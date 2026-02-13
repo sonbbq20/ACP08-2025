@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="th">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>YAk dai poie klub ma pen fan</title>
+	<style>
+		:root{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans',Arial}
+		html,body{height:100%;margin:0}
+		.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+		.controls{display:flex;gap:12px;align-items:center}
+		.colors{display:flex;gap:8px;align-items:center}
+		.colors label{cursor:pointer;display:flex;align-items:center;gap:6px}
+		.stage{width:420px;height:320px;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;position:relative;background:#fafafa}
+		.square-wrap{position:relative;width:200px;height:200px}
+		.square{width:100%;height:100%;background:#3498db;transition:background .12s;transform-origin:center center;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;user-select:none}
+		/* rotation handle */
+		.handle{position:absolute;top:-18px;left:50%;transform:translateX(-50%);width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid #ccc;box-shadow:0 2px 6px rgba(0,0,0,.12);display:grid;place-items:center;cursor:grab}
+		.handle:active{cursor:grabbing}
+		.angle{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.6);color:#fff;padding:6px 8px;border-radius:6px;font-size:13px}
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<div class="controls">
+			<div class="colors">
+				<label><input type="radio" name="color" value="#3498db" checked> Blue</label>
+				<label><input type="radio" name="color" value="#e74c3c"> Red</label>
+				<label><input type="radio" name="color" value="#2ecc71"> Green</label>
+				<label><input type="radio" name="color" value="#f1c40f"> Yellow</label>
+				<label><input type="radio" name="color" value="#34495e"> Dark</label>
+			</div>
+		</div>
+
+		<div class="stage">
+			<div class="square-wrap" id="wrap">
+				<div class="handle" id="handle">⟳</div>
+				<div class="square" id="square">Square</div>
+				<div class="angle" id="angle">0°</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const square = document.getElementById('square');
+		const wrap = document.getElementById('wrap');
+		const handle = document.getElementById('handle');
+		const angleLabel = document.getElementById('angle');
+		let rotation = 0; // degrees
+
+		// color radios
+		document.querySelectorAll('input[name="color"]').forEach(r => {
+			r.addEventListener('change', e => {
+				square.style.background = e.target.value;
+			});
+		});
+
+		// rotation dragging
+		let dragging = false;
+		let startPointerAngle = 0;
+		let startRotation = 0;
+
+		function getCenter(el){
+			const r = el.getBoundingClientRect();
+			return {x: r.left + r.width/2, y: r.top + r.height/2};
+		}
+
+		function pointerAngleFromCenter(evt, center){
+			const x = (evt.clientX ?? evt.touches?.[0]?.clientX) - center.x;
+			const y = (evt.clientY ?? evt.touches?.[0]?.clientY) - center.y;
+			return Math.atan2(y, x) * 180 / Math.PI; // degrees
+		}
+
+		handle.addEventListener('pointerdown', (e) => {
+			e.preventDefault();
+			dragging = true;
+			handle.setPointerCapture(e.pointerId);
+			const c = getCenter(wrap);
+			startPointerAngle = pointerAngleFromCenter(e, c);
+			startRotation = rotation;
+		});
+
+		window.addEventListener('pointermove', (e) => {
+			if(!dragging) return;
+			const c = getCenter(wrap);
+			const currentPointerAngle = pointerAngleFromCenter(e, c);
+			const delta = currentPointerAngle - startPointerAngle;
+			rotation = startRotation + delta;
+			square.style.transform = `rotate(${rotation}deg)`;
+			angleLabel.textContent = Math.round(rotation) + '°';
+		});
+
+		window.addEventListener('pointerup', (e) => {
+			if(!dragging) return;
+			dragging = false;
+			try{ handle.releasePointerCapture(e.pointerId); }catch(_){}
+		});
+	</script>
+</body>
+</html>
