@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarWise - อัพเดทราคาน้ำมัน</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+
+    <nav class="navbar">
+        <div class="logo">CarWise <span class="badge">TH</span></div>
+        <div class="nav-menu">
+            <a href="index.html" class="nav-link">🔍 ค้นหารถ</a>
+            <a href="oil.html" class="nav-link active">⛽ ราคาน้ำมัน</a>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 50px;">
+        <div class="page-header">
+            <h1>ราคาน้ำมันวันนี้</h1>
+            <p class="subtitle" id="oilUpdateDate">อัพเดทล่าสุด: กำลังโหลด...</p>
+        </div>
+
+        <div id="oil-grid" class="oil-grid">
+            <div class="loading-box">🔄 กำลังดึงข้อมูลราคาน้ำมัน...</div>
+        </div>
+    </div>
+
+    <footer>
+        <p>อ้างอิงข้อมูลจาก PTT Oil Price API</p>
+    </footer>
+
+    <script src="javascript.js"></script>
+</body>
+</html>

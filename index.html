@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarWise - ค้นหารถและคำนวณความคุ้มค่า</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+
+    <nav class="navbar">
+        <div class="logo">CarWise <span class="badge">TH</span></div>
+        <div class="nav-menu">
+            <a href="index.html" class="nav-link active">🔍 ค้นหารถ</a>
+            <a href="oil.html" class="nav-link">⛽ ราคาน้ำมัน</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div class="hero-content">
+            <h1>ค้นหารถคู่ใจ <br><span class="highlight">คำนวณความคุ้มค่า</span></h1>
+            <p class="subtitle">เช็คสเปครถพร้อมคำนวณค่าน้ำมันเฉลี่ยต่อกิโลเมตร</p>
+
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="เช่น Toyota Camry, Tesla, Honda Civic...">
+                    <button id="searchBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="quick-tags">
+                <span>ยอดนิยม:</span>
+                <button onclick="quickSearch('Tesla')">Tesla</button>
+                <button onclick="quickSearch('Honda')">Honda</button>
+                <button onclick="quickSearch('Toyota')">Toyota</button>
+                <button onclick="quickSearch('BYD')">BYD</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="result" class="result-grid"></div>
+    </div>
+
+    <footer>
+        <p>ขับเคลื่อนด้วยข้อมูลจาก API Ninjas และ PTT Oil Price</p>
+    </footer>
+
+    <script src="javascript.js"></script>
+</body>
+
+</html>
