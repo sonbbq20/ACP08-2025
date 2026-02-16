@@ -6,13 +6,12 @@ app = Flask(__name__)
 # เปิดใช้งาน CORS เพื่อให้หน้าเว็บ HTML เรียกใช้ API นี้ได้
 CORS(app)
 
-# ตั้งค่าการเชื่อมต่อฐานข้อมูล (ต้องตรงกับ XAMPP)
 db_config = {
     'host': 'localhost',
     'user': 'root',
-    'password': '',       # XAMPP ปกติจะไม่มีรหัสผ่าน
+    'password': '',
     'database': 'car_project',
-    'charset': 'utf8mb4'  # รองรับภาษาไทย
+    'charset': 'utf8mb4'
 }
 
 @app.route('/api/search', methods=['GET'])
@@ -23,26 +22,30 @@ def search_cars():
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor(dictionary=True)
         
-        # SQL Query: ค้นหาจาก ยี่ห้อ, รุ่น หรือ คำผสม (เช่น "Tesla Model 3")
+        # ค้นหาจากยี่ห้อ รุ่น หรือคำรวม
         sql = """
             SELECT * FROM cars 
-            WHERE CONCAT(make, ' ', model) LIKE %s 
-            OR make LIKE %s 
+            WHERE CONCAT(brand, ' ', model) LIKE %s 
+            OR brand LIKE %s 
             OR model LIKE %s
         """
         wildcard = f"%{search_term}%"
-        val = (wildcard, wildcard, wildcard)
-        
-        cursor.execute(sql, val)
+        cursor.execute(sql, (wildcard, wildcard, wildcard))
         results = cursor.fetchall()
         
         conn.close()
+        
+        # *** จุดที่แก้ไข ***
+        # แปลงข้อมูลทศนิยม (Decimal) เป็นตัวเลข (Float) ให้ Python เข้าใจ
+        for row in results:
+            row['price'] = float(row['price']) if row['price'] is not None else 0
+            row['type'] = row['car_type'] # แปลงชื่อตัวแปรให้ตรงกับที่ JS ใช้
+            
         return jsonify(results)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    # รันเซิร์ฟเวอร์ที่ Port 5000
-    print("🚀 Server starting on http://127.0.0.1:5000")
+    print("🚀 Server is running on http://127.0.0.1:5000")
     app.run(debug=True, port=5000)
