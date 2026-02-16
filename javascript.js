@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 1. ระบบค้นหารถ (เชื่อมต่อ PHP MySQL)
+// 1. ระบบค้นหารถ (เชื่อมต่อ Python Flask)
 // ==========================================
 async function searchCar() {
     const input = document.getElementById('searchInput').value.trim();
@@ -25,11 +25,11 @@ async function searchCar() {
 
     if (!input) { alert("กรุณาพิมพ์ชื่อรถ"); return; }
 
-    resultDiv.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #4a9eff;">🔄 กำลังค้นหาข้อมูลจากฐานข้อมูล...</div>';
+    resultDiv.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #4a9eff;">🔄 กำลังค้นหาข้อมูลจาก Python Server...</div>';
 
     try {
-        // เรียกไฟล์ PHP (ต้องรันผ่าน Localhost)
-        const response = await fetch(`api.php?search=${encodeURIComponent(input)}`);
+        // --- จุดที่แก้ไข: เปลี่ยน URL ไปหา Python ---
+        const response = await fetch(`http://127.0.0.1:5000/api/search?search=${encodeURIComponent(input)}`);
         
         if (!response.ok) throw new Error('Network response was not ok');
         
@@ -46,7 +46,7 @@ async function searchCar() {
         }
     } catch (error) {
         console.error('Error:', error);
-        resultDiv.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ff6b6b;">⚠️ เชื่อมต่อ Database ไม่สำเร็จ<br><small>กรุณาตรวจสอบว่าเปิด XAMPP (Apache/MySQL) แล้วหรือยัง</small></div>`;
+        resultDiv.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ff6b6b;">⚠️ เชื่อมต่อ Python Server ไม่สำเร็จ<br><small>อย่าลืมรันคำสั่ง 'python app.py' ใน Terminal</small></div>`;
     }
 }
 
@@ -114,58 +114,100 @@ function displayResults(cars) {
 }
 
 // ==========================================
-// 2. ระบบราคาน้ำมัน & วันที่ (Oil API)
+// 2. ระบบราคาน้ำมัน & วันที่ (Oil API) - มี Fallback
 // ==========================================
 async function fetchOilPrices() {
-    try {
-        const proxy = 'https://api.allorigins.win/raw?url=';
-        const url = 'https://api.chnwt.dev/thai-oil-api/latest';
-        const res = await fetch(proxy + encodeURIComponent(url));
-        const data = await res.json();
-        
-        if (data?.response?.stations?.ptt) {
-            const ptt = data.response.stations.ptt;
-            const p = (v) => v ? parseFloat(v.price || v) : 0;
+    const dateEl = document.getElementById('oilUpdateDate');
+    
+    // หลาย API sources สำหรับ fallback
+    const apiSources = [
+        // Source 1: API เดิมผ่าน AllOrigins proxy
+        async () => {
+            const proxy = 'https://api.allorigins.win/raw?url=';
+            const url = 'https://api.chnwt.dev/thai-oil-api/latest';
+            const res = await fetch(proxy + encodeURIComponent(url));
+            if (!res.ok) throw new Error('HTTP error ' + res.status);
+            return await res.json();
+        },
+        // Source 2: เรียกตรงโดยไม่ผ่าน proxy
+        async () => {
+            const res = await fetch('https://api.chnwt.dev/thai-oil-api/latest');
+            if (!res.ok) throw new Error('HTTP error ' + res.status);
+            return await res.json();
+        },
+        // Source 3: ใช้ proxy อื่น (corsproxy.io)
+        async () => {
+            const proxy = 'https://corsproxy.io/?';
+            const url = 'https://api.chnwt.dev/thai-oil-api/latest';
+            const res = await fetch(proxy + encodeURIComponent(url));
+            if (!res.ok) throw new Error('HTTP error ' + res.status);
+            return await res.json();
+        }
+    ];
+
+    // ลองแต่ละ source จนกว่าจะสำเร็จ
+    for (let i = 0; i < apiSources.length; i++) {
+        try {
+            console.log(`🔄 กำลังลอง API source ${i + 1}/${apiSources.length}...`);
+            const data = await Promise.race([
+                apiSources[i](),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000))
+            ]);
             
-            if (ptt.gasohol_95) oilPrices.gasohol95 = p(ptt.gasohol_95);
-            if (ptt.gasohol_91) oilPrices.gasohol91 = p(ptt.gasohol_91);
-            if (ptt.gasohol_e20) oilPrices.e20 = p(ptt.gasohol_e20);
-            if (ptt.gassohol_e85) oilPrices.e85 = p(ptt.gassohol_e85);
-            if (ptt.diesel_b7) oilPrices.diesel = p(ptt.diesel_b7);
-            
-            // ตรวจสอบว่าอยู่หน้า Oil หรือไม่
-            const oilGrid = document.getElementById('oil-grid');
-            if (oilGrid) {
-                renderOilPage();
+            if (data?.response?.stations?.ptt) {
+                const ptt = data.response.stations.ptt;
+                const p = (v) => v ? parseFloat(v.price || v) : 0;
                 
-                // --- ส่วนอัพเดทวันที่ ---
-                const dateEl = document.getElementById('oilUpdateDate');
-                if (dateEl) {
-                    // ใช้วันที่จาก API ถ้ามี หรือใช้วันที่ปัจจุบัน
-                    let dateStr = data.response.date; 
+                // อัพเดทราคา
+                let updated = false;
+                if (ptt.gasohol_95) { oilPrices.gasohol95 = p(ptt.gasohol_95); updated = true; }
+                if (ptt.gasohol_91) { oilPrices.gasohol91 = p(ptt.gasohol_91); updated = true; }
+                if (ptt.gasohol_e20) { oilPrices.e20 = p(ptt.gasohol_e20); updated = true; }
+                if (ptt.gasohol_e85) { oilPrices.e85 = p(ptt.gasohol_e85); updated = true; }
+                if (ptt.diesel_b7) { oilPrices.diesel = p(ptt.diesel_b7); updated = true; }
+                
+                if (updated) {
+                    console.log(`✅ ดึงราคาน้ำมันสำเร็จจาก source ${i + 1}`);
                     
-                    if (!dateStr) {
-                        // ถ้า API ไม่ส่งวันที่มา ให้ใช้วันที่ปัจจุบันแบบไทย
-                        const today = new Date();
-                        dateStr = today.toLocaleDateString('th-TH', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                        });
+                    // อัพเดทหน้าราคาน้ำมัน
+                    const oilGrid = document.getElementById('oil-grid');
+                    if (oilGrid) renderOilPage();
+                    
+                    // อัพเดทวันที่
+                    if (dateEl) {
+                        let dateStr = data.response.date;
+                        if (!dateStr) {
+                            dateStr = new Date().toLocaleDateString('th-TH', {
+                                year: 'numeric', month: 'long', day: 'numeric'
+                            });
+                        }
+                        dateEl.innerHTML = `อัพเดทล่าสุด: <span style="color:#4ade80">${dateStr}</span>`;
                     }
-                    
-                    dateEl.innerHTML = `อัพเดทล่าสุด: <span style="color:#4ade80">${dateStr}</span>`;
+                    return; // สำเร็จแล้ว ออกจากฟังก์ชัน
                 }
             }
+        } catch (e) {
+            console.warn(`❌ API source ${i + 1} ล้มเหลว:`, e.message);
+            // ลอง source ถัดไป
         }
-    } catch (e) { 
-        console.warn("Oil API Error", e);
-        // กรณี Error ให้แสดงวันที่ปัจจุบันแต่แจ้งว่าระบบขัดข้อง
-        const dateEl = document.getElementById('oilUpdateDate');
-        if (dateEl) {
-            const today = new Date().toLocaleDateString('th-TH');
-            dateEl.innerHTML = `อัพเดทล่าสุด: ${today} <span style="color:#ff6b6b">(ราคาอ้างอิง - ระบบขัดข้อง)</span>`;
-        }
+    }
+    
+    // ถ้าทุก source ล้มเหลว - ใช้ราคาสำรอง (อัพเดทล่าสุด 16 ก.พ. 2026)
+    console.error("⚠️ ทุก API หยุดทำงาน - ใช้ราคาสำรอง");
+    
+    oilPrices = {
+        gasohol95: 37.24, gasohol91: 36.89, e20: 35.15, e85: 32.74,
+        diesel: 30.94, diesel_premium: 44.20, electricity: 4.50
+    };
+    
+    const oilGrid = document.getElementById('oil-grid');
+    if (oilGrid) renderOilPage();
+    
+    if (dateEl) {
+        const today = new Date().toLocaleDateString('th-TH', {
+            year: 'numeric', month: 'long', day: 'numeric'
+        });
+        dateEl.innerHTML = `อัพเดทล่าสุด: ${today} <span style="color:#fbbf24;">⚠️ (ราคาอ้างอิง - API ขัดข้อง)</span>`;
     }
 }
 
