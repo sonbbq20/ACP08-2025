@@ -1,4 +1,4 @@
-// Global State: ราคาน้ำมัน
+// Global State: ราคาน้ำมัน (รออัพเดทจาก API)
 let oilPrices = {
     gasohol95: 36.50, gasohol91: 36.10, e20: 34.40, e85: 32.00,
     diesel: 30.50, diesel_premium: 43.50, electricity: 4.50
@@ -33,7 +33,7 @@ async function searchCar() {
     resultDiv.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #4a9eff;">🔄 กำลังค้นหาข้อมูลจากฐานข้อมูล...</div>';
 
     try {
-        // วิ่งไปดึงข้อมูลจาก Python Server
+        // วิ่งไปดึงข้อมูลจาก Python Server (App.py)
         const response = await fetch(`http://127.0.0.1:5000/api/search?search=${encodeURIComponent(input)}`);
         
         if (!response.ok) throw new Error('Network response was not ok');
@@ -64,6 +64,7 @@ function displayResults(cars) {
         let fuelName = 'เบนซิน';
         let unit = 'ลิตร';
         
+        // ตรวจสอบประเภทเชื้อเพลิงเพื่อคำนวณราคา
         if (car.fuel === 'ev') {
             fuelPrice = oilPrices.electricity;
             fuelName = 'ไฟฟ้า (EV)';
@@ -86,8 +87,19 @@ function displayResults(cars) {
         const maxRange = (car.tank_size * car.efficiency).toFixed(0);
         const priceStr = car.price.toLocaleString();
         
-        const imgQuery = `${car.brand} ${car.model} 2024 side view`;
-        const imgUrl = `https://tse2.mm.bing.net/th?q=${encodeURIComponent(imgQuery)}&w=500&h=300&c=7&rs=1&p=0`;
+        // --- ส่วนที่คุณต้องการ: Logic เลือกรูปภาพ ---
+        let imgUrl = "";
+        
+        // 1. เช็คว่าใน Database มีลิงก์รูปใส่ไว้ไหม? (ถ้ามีใช้เลย)
+        // ต้องตรวจสอบ car.image_url ว่ามีค่าและไม่เป็นค่าว่าง
+        if (car.image_url && car.image_url.trim() !== "") {
+            imgUrl = car.image_url;
+        } else {
+            // 2. ถ้าไม่มี ให้ใช้ระบบค้นหาอัตโนมัติจาก Bing เหมือนเดิม
+            const imgQuery = `${car.brand} ${car.model} 2024 side view`;
+            imgUrl = `https://tse2.mm.bing.net/th?q=${encodeURIComponent(imgQuery)}&w=500&h=300&c=7&rs=1&p=0`;
+        }
+        // ----------------------------------------
 
         const card = document.createElement('div');
         card.className = 'car-card';
