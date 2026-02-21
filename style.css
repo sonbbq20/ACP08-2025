@@ -317,6 +317,17 @@ footer {
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
     --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+
+    /* Added variables used by legacy/login styles */
+    --bg-primary: rgba(255, 255, 255, 0.03);
+    --bg-secondary: rgba(255, 255, 255, 0.02);
+    --border-color: rgba(255, 255, 255, 0.06);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-hover: #00b8b9;
+    --accent-light: rgba(0, 210, 211, 0.08);
+    --transition: all 0.2s ease;
+    --bg-surface: rgba(30, 41, 59, 0.6);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Prompt', sans-serif; }
@@ -423,4 +434,258 @@ button#searchBtn:hover { transform: scale(1.05); }
 @media (max-width: 768px) {
     .navbar { flex-direction: column; gap: 15px; padding: 15px; }
     h1 { font-size: 2rem; }
+}
+
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: var(--bg-secondary);
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2.5rem;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.login-logo .logo-icon {
+    width: 48px;
+    height: 48px;
+}
+
+.login-logo .logo-icon svg {
+    width: 26px;
+    height: 26px;
+}
+
+.login-logo span {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.login-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.login-subtitle {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+}
+
+.login-form {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.login-form .btn-primary {
+    width: 100%;
+    padding: 0.875rem;
+}
+
+.login-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.login-divider span {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.login-footer {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.login-footer a {
+    color: var(--accent);
+    font-weight: 500;
+}
+
+.login-footer a:hover {
+    color: var(--accent-hover);
+}
+
+.login-theme-toggle {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+}
+
+.btn-secondary {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.btn-ghost {
+    color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+    color: var(--accent);
+    background: var(--accent-light);
+}
+
+/* ===== Form Elements ===== */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    transition: var(--transition);
+}
+
+.form-input:hover {
+    border-color: var(--text-secondary);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.form-input::placeholder {
+    color: var(--text-secondary);
+}
+
+/* Ensure remember checkbox sits on the left with proper spacing */
+.login-form input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+
+.login-form label[for="remember"] {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+/* Row wrapper for remember checkbox to ensure left alignment */
+.remember-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    justify-content: flex-start;
+}
+
+/* ===== Tables ===== */
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+th {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    background: var(--bg-surface);
+}
+
+td {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+tr:hover td {
+    background: var(--bg-surface);
 }
