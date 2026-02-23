@@ -55,7 +55,7 @@ async function searchCar() {
   try {
     // เชื่อมต่อ Python Server
     const response = await fetch(
-      `https://sonbbq20.pythonanywhere.com/api/search?search=${encodeURIComponent(input)}`);
+      `https://acp08-2025.onrender.com/api/search?search=${encodeURIComponent(input)}`);
 
     if (!response.ok) throw new Error("Network response was not ok");
 
