@@ -7,11 +7,14 @@ app = Flask(__name__)
 CORS(app)
 
 db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': '',
-    'database': 'car_project',
-    'charset': 'utf8mb4'
+    'host': "gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
+    'port': 4000,
+    'user': "3KF3669S1D6aNc6.root",
+    'password': "UkJ0po4z1bURZQ00",
+    'database': "test",
+    'charset': 'utf8mb4',
+    'ssl_verify_cert': True,
+    'ssl_verify_identity': True,
 }
 
 @app.route('/api/search', methods=['GET'])
