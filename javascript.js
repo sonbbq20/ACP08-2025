@@ -14,10 +14,10 @@ let oilPrices = {
 
 document.addEventListener("DOMContentLoaded", () => {
   // 1. เทคนิคสำคัญ: สั่งโชว์ข้อมูลทันที! ไม่ต้องรอ API
-  renderOilPage();
+  renderOilPage();  
 
   // 2. แล้วค่อยแอบไปดึงข้อมูลจริงมาอัพเดททีหลัง (Background Update)
-  fetchOilPrices();
+  getOilPrices();
 
   // ตั้งค่าปุ่มค้นหา
   const searchBtn = document.getElementById("searchBtn");
@@ -55,8 +55,7 @@ async function searchCar() {
   try {
     // เชื่อมต่อ Python Server
     const response = await fetch(
-      `http://127.0.0.1:5000/api/search?search=${encodeURIComponent(input)}`,
-    );
+      `https://sonbbq20.pythonanywhere.com/api/search?search=${encodeURIComponent(input)}`);
 
     if (!response.ok) throw new Error("Network response was not ok");
 
@@ -148,7 +147,7 @@ function displayResults(cars) {
 // ==========================================
 // 3. ระบบดึงราคาน้ำมัน 
 // ==========================================
-async function fetchOilPrices() {
+async function getOilPrices() {
   const dateEl = document.getElementById("oilUpdateDate");
 
   // โชว์ว่ากำลังเช็คข้อมูล แต่ตัวเลขราคาขึ้นโชว์ไปแล้ว
@@ -157,13 +156,12 @@ async function fetchOilPrices() {
 
   try {
     const proxy = "https://corsproxy.io/?";
-    const url = "https://api.chnwt.dev/thai-oil-api/latest";
-
+    const apiurl = "https://api.chnwt.dev/thai-oil-api/latest";
     // ตั้งเวลา Timeout แค่ 5 วินาทีพอ
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-    const res = await fetch(proxy + encodeURIComponent(url), {
+    const res = await fetch(proxy + encodeURIComponent(apiurl), {
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
@@ -179,6 +177,7 @@ async function fetchOilPrices() {
       if (ptt.gasohol_91) oilPrices.gasohol91 = p(ptt.gasohol_91);
       if (ptt.gasohol_e20) oilPrices.e20 = p(ptt.gasohol_e20);
       if (ptt.diesel_b7) oilPrices.diesel = p(ptt.diesel_b7);
+      if (ptt.gasohol_e85) oilPrices.e85 = p(ptt.gasohol_e85);
 
       // สั่งวาดหน้าจอใหม่อีกครั้งด้วยราคาใหม่
       renderOilPage();
@@ -209,6 +208,7 @@ function renderOilPage() {
     { n: "แก๊สโซฮอล์ 91", p: oilPrices.gasohol91, c: "#10b981" },
     { n: "แก๊สโซฮอล์ E20", p: oilPrices.e20, c: "#0ea5e9" },
     { n: "ดีเซล B7", p: oilPrices.diesel, c: "#6366f1" },
+    { n: "แก๊สโซฮอล์ E85", p: oilPrices.e85, c: "#8b5cf6" },
     { n: "ไฟฟ้า (EV)", p: oilPrices.electricity, c: "#00d2d3", u: "บาท/หน่วย" },
   ];
 
