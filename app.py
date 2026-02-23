@@ -7,14 +7,14 @@ app = Flask(__name__)
 CORS(app)
 
 db_config = {
-    'host': "gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
-    'port': 4000,
-    'user': "3KF3669S1D6aNc6.root",
-    'password': "UkJ0po4z1bURZQ00",
-    'database': "test",
-    'charset': 'utf8mb4',
-    'ssl_verify_cert': True,
-    'ssl_verify_identity': True,
+    'host' : "gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
+    'port' : 4000,
+    'user' : "3KF3669S1D6aNc6.root",
+    'password' : "UkJ0po4z1bURZQ00",
+    'database' : "test",
+    'charset' : 'utf8mb4',
+    'ssl_verify_cert' : True,
+    'ssl_verify_identity' : True,
 }
 
 @app.route('/api/search', methods=['GET'])
@@ -43,7 +43,9 @@ def search_cars():
         for row in results:
             row['price'] = float(row['price']) if row['price'] is not None else 0
             row['type'] = row['car_type'] # แปลงชื่อตัวแปรให้ตรงกับที่ JS ใช้
-            
+            row['efficiency'] = float(row['efficiency']) if row['efficiency'] is not None else 0
+            row['tank_size'] = float(row['tank_size']) if row['tank_size'] is not None else 0
+            row['acc_0_100'] = float(row['acc_0_100']) if row['acc_0_100'] is not None else 0
         return jsonify(results)
 
     except Exception as e:
