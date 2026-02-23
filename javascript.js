@@ -147,55 +147,55 @@ function displayResults(cars) {
 // ==========================================
 // 3. ระบบดึงราคาน้ำมัน 
 // ==========================================
-async function getOilPrices() {
-  const dateEl = document.getElementById("oilUpdateDate");
+async function fetchOilPrices() {
+    const dateEl = document.getElementById('oilUpdateDate');
+    
+    // โชว์ว่ากำลังเช็คข้อมูล แต่ตัวเลขราคากลางต้องขึ้นโชว์ไปแล้ว (อย่าลืมให้ renderOilPage() ถูกเรียกตอนเปิดเว็บ)
+    if(dateEl) dateEl.innerHTML = `สถานะ: <span style="color:#facc15">กำลังเช็คราคาล่าสุด...</span>`;
 
-  // โชว์ว่ากำลังเช็คข้อมูล แต่ตัวเลขราคาขึ้นโชว์ไปแล้ว
-  if (dateEl)
-    dateEl.innerHTML = `สถานะ: <span style="color:#facc15">กำลังเช็คราคาล่าสุด...</span>`;
+    try {
+        // เปลี่ยนมาใช้ Proxy ของ allorigins ซึ่งค่อนข้างเสถียรกว่าเวลาอยู่บน Vercel
+        const proxy = 'https://api.allorigins.win/raw?url='; 
+        const url = 'https://api.chnwt.dev/thai-oil-api/latest';
+        
+        // บังคับหยุดถ้าดึงข้อมูลนานเกิน 3 วินาที (เว็บจะได้ไม่ค้าง)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-  try {
-    const proxy = "https://corsproxy.io/?";
-    const apiurl = "https://api.chnwt.dev/thai-oil-api/latest";
-    // ตั้งเวลา Timeout แค่ 5 วินาทีพอ
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const res = await fetch(proxy + encodeURIComponent(url), { signal: controller.signal });
+        clearTimeout(timeoutId);
 
-    const res = await fetch(proxy + encodeURIComponent(apiurl), {
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
+        if (!res.ok) throw new Error("API Error");
 
-    const data = await res.json();
-
-    if (data?.response?.stations?.ptt) {
-      const ptt = data.response.stations.ptt;
-      const p = (v) => (v ? parseFloat(v.price || v) : 0);
-
-      // อัพเดทตัวแปรด้วยราคาจริง (Real-time)
-      if (ptt.gasohol_95) oilPrices.gasohol95 = p(ptt.gasohol_95);
-      if (ptt.gasohol_91) oilPrices.gasohol91 = p(ptt.gasohol_91);
-      if (ptt.gasohol_e20) oilPrices.e20 = p(ptt.gasohol_e20);
-      if (ptt.diesel_b7) oilPrices.diesel = p(ptt.diesel_b7);
-      if (ptt.gasohol_e85) oilPrices.e85 = p(ptt.gasohol_e85);
-
-      // สั่งวาดหน้าจอใหม่อีกครั้งด้วยราคาใหม่
-      renderOilPage();
-
-      if (dateEl) {
-        let dateStr =
-          data.response.date || new Date().toLocaleDateString("th-TH");
-        dateEl.innerHTML = `อัพเดทล่าสุด: <span style="color:#4ade80">${dateStr}</span>`;
-      }
+        const data = await res.json();
+        
+        if (data?.response?.stations?.ptt) {
+            const ptt = data.response.stations.ptt;
+            const p = (v) => v ? parseFloat(v.price || v) : 0;
+            
+            // อัพเดทตัวแปรด้วยราคาจริง
+            if (ptt.gasohol_95) oilPrices.gasohol95 = p(ptt.gasohol_95);
+            if (ptt.gasohol_91) oilPrices.gasohol91 = p(ptt.gasohol_91);
+            if (ptt.gasohol_e20) oilPrices.e20 = p(ptt.gasohol_e20);
+            if (ptt.diesel_b7) oilPrices.diesel = p(ptt.diesel_b7);
+            
+            // วาดหน้าจอใหม่
+            renderOilPage();
+            
+            if (dateEl) {
+                let dateStr = data.response.date || new Date().toLocaleDateString('th-TH');
+                dateEl.innerHTML = `อัพเดทล่าสุด: <span style="color:#4ade80">${dateStr}</span> (ราคา ปตท.)`;
+            }
+        }
+    } catch (e) { 
+        console.warn("ใช้ราคา Offline แทน (API ไม่ตอบสนอง):", e);
+        // ถ้าดึงไม่ได้ ให้แสดงข้อความว่าใช้ราคาอ้างอิง และวาดหน้าจอด้วยราคากลาง
+        renderOilPage(); 
+        if (dateEl) {
+            const today = new Date().toLocaleDateString('th-TH');
+            dateEl.innerHTML = `อัพเดทล่าสุด: ${today} <span style="color:#94a3b8">(ราคาอ้างอิง Offline)</span>`;
+        }
     }
-  } catch (e) {
-    console.warn("ใช้ราคา Offline แทน:", e);
-    // ถ้าดึงไม่ได้ ไม่ต้องทำอะไร เพราะเราโชว์ราคา Offline ไปตั้งแต่แรกแล้ว
-    if (dateEl) {
-      const today = new Date().toLocaleDateString("th-TH");
-      dateEl.innerHTML = `อัพเดทล่าสุด: ${today} <span style="color:#94a3b8">(ราคาอ้างอิง)</span>`;
-    }
-  }
 }
 
 function renderOilPage() {
