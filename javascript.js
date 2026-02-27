@@ -3,11 +3,14 @@
 // ==========================================
 let oilPrices = {
   gasohol95: 30.85,
+  gasoline95: 34.94,
   gasohol91: 30.48,
   e20: 29.14,
   e85: 27.5,
   diesel: 29.94,
   premium_diesel: 41.5,
+  premium_gasohol_95: 35.29,
+  ngv: 15.0,
   electricity: 4.5,
 };
 
@@ -204,11 +207,14 @@ async function fetchOilPrices() {
       const p = (v) => (v ? parseFloat(v.price || v) : 0);
 
       if (ptt.gasohol_95) oilPrices.gasohol95 = p(ptt.gasohol_95);
+      if (ptt.gasoline_95) oilPrices.gasoline95 = p(ptt.gasoline_95);
       if (ptt.gasohol_91) oilPrices.gasohol91 = p(ptt.gasohol_91);
       if (ptt.gasohol_e20) oilPrices.e20 = p(ptt.gasohol_e20);
       if (ptt.diesel_b7) oilPrices.diesel = p(ptt.diesel_b7);
       if (ptt.gasohol_e85) oilPrices.e85 = p(ptt.gasohol_e85);
       if (ptt.premium_diesel) oilPrices.premium_diesel = p(ptt.premium_diesel);
+      if (ptt.premium_gasohol_95) oilPrices.premium_gasohol_95 = p(ptt.premium_gasohol_95);
+      if (ptt.ngv) oilPrices.ngv = p(ptt.ngv);
       if (ptt.electricity) oilPrices.electricity = p(ptt.electricity);
 
       renderOilPage();
@@ -240,12 +246,15 @@ function renderOilPage() {
   grid.innerHTML = "";
 
   const oils = [
-    { n: "แก๊สโซฮอล์ 95", p: oilPrices.gasohol95, c: "#f59e0b" },
+    { n: "แก๊สโซฮอล์ 95", p: oilPrices.gasohol95, c: "#f59e0b" }, 
+    { n: "เบนซิน 95", p: oilPrices.gasoline95, c: "#ef4444" },
     { n: "แก๊สโซฮอล์ 91", p: oilPrices.gasohol91, c: "#10b981" },
     { n: "แก๊สโซฮอล์ E20", p: oilPrices.e20, c: "#0ea5e9" },
     { n: "ดีเซล B7", p: oilPrices.diesel, c: "#484be9" },
-    { n: "ดีเซล Premium", p: oilPrices.premium_diesel, c: "#8b5cf6" },
     { n: "แก๊สโซฮอล์ E85", p: oilPrices.e85, c: "#ec4899" },
+    { n: "แก๊สโซฮอล์ 95 Premium", p: oilPrices.premium_gasohol_95, c: "#f43f5e" },    
+    { n: "ดีเซล Premium", p: oilPrices.premium_diesel, c: "#8b5cf6" },
+    { n: "NGV", p: oilPrices.ngv, c: "#7a7a7a" },
     { n: "ไฟฟ้า (EV)", p: oilPrices.electricity, c: "#00d2d3", u: "บาท/หน่วย" },
   ];
 
