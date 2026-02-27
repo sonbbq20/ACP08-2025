@@ -149,13 +149,20 @@ function displayResults(cars) {
 // ==========================================
 async function fetchOilPrices() {
   const dateEl = document.getElementById("oilUpdateDate");
+  const proxies = [
+    "https://corsproxy.io/?",
+    "https://api.allorigins.win/raw?url=",
+    "https://thingproxy.freeboard.io/fetch/",
+  ];
+
 
   // โชว์ว่ากำลังเช็คข้อมูล แต่ตัวเลขราคาขึ้นโชว์ไปแล้ว
   if (dateEl)
     dateEl.innerHTML = `สถานะ: <span style="color:#facc15">กำลังเช็คราคาล่าสุด...</span>`;
 
   try {
-    const proxy = "https://corsproxy.io/?";
+    // สุ่มใช้ Proxy ตัวไหนก็ได้ เผื่ออันนึงล่ม จะได้ไม่ล่มทั้งหมด
+    const proxy = proxies[Math.floor(Math.random() * proxies.length)];
     const url = "https://api.chnwt.dev/thai-oil-api/latest";
 
     // ตั้งเวลา Timeout แค่ 5 วินาทีพอ
