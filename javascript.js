@@ -7,7 +7,7 @@ let oilPrices = {
   e20: 29.14,
   e85: 27.5,
   diesel: 29.94,
-  diesel_premium: 41.5,
+  premium_diesel: 41.5,
   electricity: 4.5,
 };
 
@@ -149,12 +149,6 @@ function displayResults(cars) {
 // ==========================================
 async function fetchOilPrices() {
   const dateEl = document.getElementById("oilUpdateDate");
-  const proxies = [
-    "https://corsproxy.io/?",
-    "https://api.allorigins.win/raw?url=",
-    "https://thingproxy.freeboard.io/fetch/",
-  ];
-
 
   // โชว์ว่ากำลังเช็คข้อมูล แต่ตัวเลขราคาขึ้นโชว์ไปแล้ว
   if (dateEl)
@@ -162,17 +156,31 @@ async function fetchOilPrices() {
 
   const url = "https://api.chnwt.dev/thai-oil-api/latest";
 
+  const proxies = [
+    (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+    (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+    (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+    (u) => `https://proxy.cors.sh/${u}`,
+  ];
+
+  // แปลง response จาก allorigins ที่ wrap ใน { contents: "..." }
+  const parseResponse = async (res, isAllOrigins) => {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (isAllOrigins) {
+      const wrapper = await res.json();
+      return JSON.parse(wrapper.contents);
+    }
+    return await res.json();
+  };
+
   // ลองทีละ proxy จนกว่าจะสำเร็จ
-  const tryFetch = async (proxyUrl) => {
+  const tryFetch = async (buildUrl, isAllOrigins = false) => {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     try {
-      const res = await fetch(proxyUrl + encodeURIComponent(url), {
-        signal: controller.signal,
-      });
+      const res = await fetch(buildUrl(url), { signal: controller.signal });
       clearTimeout(timeoutId);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return await res.json();
+      return await parseResponse(res, isAllOrigins);
     } catch (err) {
       clearTimeout(timeoutId);
       throw err;
@@ -180,49 +188,49 @@ async function fetchOilPrices() {
   };
 
   let data = null;
-  let lastError = null;
-  for (const proxy of proxies) {
+  for (let i = 0; i < proxies.length; i++) {
     try {
-      data = await tryFetch(proxy);
+      const isAllOrigins = i === 0; // allorigins ต้อง parse contents
+      data = await tryFetch(proxies[i], isAllOrigins);
       break;
     } catch (err) {
-      lastError = err;
-      console.warn(`Proxy ${proxy} failed:`, err.message);
+      console.warn(`Proxy ${i + 1} failed:`, err.message);
     }
   }
 
-  try {
-    if (!data) throw lastError;
-
-    if (data?.response?.stations?.ptt) {
+  if (data?.response?.stations?.ptt) {
+    try {
       const ptt = data.response.stations.ptt;
       const p = (v) => (v ? parseFloat(v.price || v) : 0);
 
-      // อัพเดทตัวแปรด้วยราคาจริง (Real-time)
       if (ptt.gasohol_95) oilPrices.gasohol95 = p(ptt.gasohol_95);
       if (ptt.gasohol_91) oilPrices.gasohol91 = p(ptt.gasohol_91);
       if (ptt.gasohol_e20) oilPrices.e20 = p(ptt.gasohol_e20);
       if (ptt.diesel_b7) oilPrices.diesel = p(ptt.diesel_b7);
       if (ptt.gasohol_e85) oilPrices.e85 = p(ptt.gasohol_e85);
-      if (ptt.diesel_premium) oilPrices.diesel_premium = p(ptt.diesel_premium);
+      if (ptt.premium_diesel) oilPrices.premium_diesel = p(ptt.premium_diesel);
       if (ptt.electricity) oilPrices.electricity = p(ptt.electricity);
 
-      // สั่งวาดหน้าจอใหม่อีกครั้งด้วยราคาใหม่
       renderOilPage();
 
       if (dateEl) {
-        let dateStr =
-          data.response.date || new Date().toLocaleDateString("th-TH");
+        let dateStr = data.response.date || new Date().toLocaleDateString("th-TH");
         dateEl.innerHTML = `อัพเดทล่าสุด: <span style="color:#4ade80">${dateStr}</span>`;
       }
+    } catch (e) {
+      console.warn("Parse error:", e);
+      setOfflineDateLabel(dateEl);
     }
-  } catch (e) {
-    console.warn("ใช้ราคา Offline แทน:", e);
-    // ถ้าดึงไม่ได้ ไม่ต้องทำอะไร เพราะเราโชว์ราคา Offline ไปตั้งแต่แรกแล้ว
-    if (dateEl) {
-      const today = new Date().toLocaleDateString("th-TH");
-      dateEl.innerHTML = `อัพเดทล่าสุด: ${today} <span style="color:#94a3b8">(ราคาอ้างอิง)</span>`;
-    }
+  } else {
+    // ดึงไม่ได้ทุก proxy → ใช้ราคา offline เงียบๆ ไม่ขึ้น error
+    setOfflineDateLabel(dateEl);
+  }
+}
+
+function setOfflineDateLabel(dateEl) {
+  if (dateEl) {
+    const today = new Date().toLocaleDateString("th-TH");
+    dateEl.innerHTML = `อัพเดทล่าสุด: ${today} <span style="color:#94a3b8">(ราคาอ้างอิง)</span>`;
   }
 }
 
@@ -236,7 +244,7 @@ function renderOilPage() {
     { n: "แก๊สโซฮอล์ 91", p: oilPrices.gasohol91, c: "#10b981" },
     { n: "แก๊สโซฮอล์ E20", p: oilPrices.e20, c: "#0ea5e9" },
     { n: "ดีเซล B7", p: oilPrices.diesel, c: "#484be9" },
-    { n: "ดีเซล Premium", p: oilPrices.diesel_premium, c: "#8b5cf6" },
+    { n: "ดีเซล Premium", p: oilPrices.premium_diesel, c: "#8b5cf6" },
     { n: "แก๊สโซฮอล์ E85", p: oilPrices.e85, c: "#ec4899" },
     { n: "ไฟฟ้า (EV)", p: oilPrices.electricity, c: "#00d2d3", u: "บาท/หน่วย" },
   ];
