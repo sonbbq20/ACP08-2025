@@ -160,21 +160,39 @@ async function fetchOilPrices() {
   if (dateEl)
     dateEl.innerHTML = `สถานะ: <span style="color:#facc15">กำลังเช็คราคาล่าสุด...</span>`;
 
-  try {
-    // สุ่มใช้ Proxy ตัวไหนก็ได้ เผื่ออันนึงล่ม จะได้ไม่ล่มทั้งหมด
-    const proxy = proxies[Math.floor(Math.random() * proxies.length)];
-    const url = "https://api.chnwt.dev/thai-oil-api/latest";
+  const url = "https://api.chnwt.dev/thai-oil-api/latest";
 
-    // ตั้งเวลา Timeout แค่ 5 วินาทีพอ
+  // ลองทีละ proxy จนกว่าจะสำเร็จ
+  const tryFetch = async (proxyUrl) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
+    try {
+      const res = await fetch(proxyUrl + encodeURIComponent(url), {
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      clearTimeout(timeoutId);
+      throw err;
+    }
+  };
 
-    const res = await fetch(proxy + encodeURIComponent(url), {
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
+  let data = null;
+  let lastError = null;
+  for (const proxy of proxies) {
+    try {
+      data = await tryFetch(proxy);
+      break;
+    } catch (err) {
+      lastError = err;
+      console.warn(`Proxy ${proxy} failed:`, err.message);
+    }
+  }
 
-    const data = await res.json();
+  try {
+    if (!data) throw lastError;
 
     if (data?.response?.stations?.ptt) {
       const ptt = data.response.stations.ptt;
