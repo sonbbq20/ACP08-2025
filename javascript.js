@@ -1,5 +1,5 @@
 // ==========================================
-// 1. ตั้งค่าราคากลาง 
+// 1. ตั้งค่าราคากลาง
 // ==========================================
 let oilPrices = {
   gasohol95: 30.85,
@@ -39,9 +39,6 @@ function quickSearch(term) {
   }
 }
 
-// ==========================================
-// 2. ระบบค้นหารถ (เชื่อมต่อ Python)
-// ==========================================
 async function searchCar() {
   const input = document.getElementById("searchInput").value.trim();
   const resultDiv = document.getElementById("result");
@@ -52,19 +49,34 @@ async function searchCar() {
   }
 
   resultDiv.innerHTML =
-    '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #4a9eff;">🔄 กำลังค้นหาข้อมูล...</div>';
+    '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #4a9eff;">🔄 กำลังค้นหาข้อมูลจาก Supabase...</div>';
+
+  // 1. นำ URL และ Key จากขั้นตอนที่ 4 มาใส่ตรงนี้
+  const SUPABASE_URL = "https://fyaqsdqvircjanlasxov.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5YXFzZHF2aXJjamFubGFzeG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjUwMzcsImV4cCI6MjA4ODk0MTAzN30.pO9fF_ouzuOj5CbYhPZmCXMoVZFohFsk9cWj4Ur4dtQ";
+
+  // 2. สร้าง URL สำหรับค้นหา (ilike คือการค้นหาแบบไม่สนพิมพ์เล็ก/ใหญ่ เหมือนคำสั่ง LIKE ใน SQL)
+  const queryUrl = `${SUPABASE_URL}/rest/v1/cars?select=*&or=(brand.ilike.%25${input}%25,model.ilike.%25${input}%25)`;
 
   try {
-    // เชื่อมต่อ Python Server
-    const response = await fetch(
-      `http://127.0.0.1:5000/api/search?search=${encodeURIComponent(input)}`,
-    );
+    // 3. ยิงคำขอไปที่ Supabase โดยตรง (ไม่ต้องผ่าน Python)
+    const response = await fetch(queryUrl, {
+      method: "GET",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+      },
+    });
 
     if (!response.ok) throw new Error("Network response was not ok");
 
+    // ข้อมูลรถที่ได้กลับมา จะหน้าตาเหมือนตอนเขียน Python ทุกประการ!
     const cars = await response.json();
 
     if (cars.length > 0) {
+      // ระบบแสดงผลจะใช้โค้ดเดิมของคุณได้เลย ไม่ต้องแก้อะไร!
+      // หมายเหตุ: ตรงตัวแปร car.type อาจจะต้องแก้เป็น car.car_type ตามฐานข้อมูล
       displayResults(cars);
     } else {
       resultDiv.innerHTML = `
@@ -75,7 +87,7 @@ async function searchCar() {
     }
   } catch (error) {
     console.error("Error:", error);
-    resultDiv.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ff6b6b;">⚠️ เชื่อมต่อฐานข้อมูลไม่ได้<br><small>อย่าลืมรัน 'python app.py'</small></div>`;
+    resultDiv.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ff6b6b;">⚠️ ไม่สามารถเชื่อมต่อฐานข้อมูลได้</div>`;
   }
 }
 
@@ -148,7 +160,7 @@ function displayResults(cars) {
 }
 
 // ==========================================
-// 3. ระบบดึงราคาน้ำมัน 
+// 3. ระบบดึงราคาน้ำมัน
 // ==========================================
 async function fetchOilPrices() {
   const dateEl = document.getElementById("oilUpdateDate");
@@ -213,14 +225,16 @@ async function fetchOilPrices() {
       if (ptt.diesel_b7) oilPrices.diesel = p(ptt.diesel_b7);
       if (ptt.gasohol_e85) oilPrices.e85 = p(ptt.gasohol_e85);
       if (ptt.premium_diesel) oilPrices.premium_diesel = p(ptt.premium_diesel);
-      if (ptt.premium_gasohol_95) oilPrices.premium_gasohol_95 = p(ptt.premium_gasohol_95);
+      if (ptt.premium_gasohol_95)
+        oilPrices.premium_gasohol_95 = p(ptt.premium_gasohol_95);
       if (ptt.ngv) oilPrices.ngv = p(ptt.ngv);
       if (ptt.electricity) oilPrices.electricity = p(ptt.electricity);
 
       renderOilPage();
 
       if (dateEl) {
-        let dateStr = data.response.date || new Date().toLocaleDateString("th-TH");
+        let dateStr =
+          data.response.date || new Date().toLocaleDateString("th-TH");
         dateEl.innerHTML = `อัพเดทล่าสุด: <span style="color:#4ade80">${dateStr}</span>`;
       }
     } catch (e) {
@@ -246,13 +260,17 @@ function renderOilPage() {
   grid.innerHTML = "";
 
   const oils = [
-    { n: "แก๊สโซฮอล์ 95", p: oilPrices.gasohol95, c: "#f59e0b" }, 
+    { n: "แก๊สโซฮอล์ 95", p: oilPrices.gasohol95, c: "#f59e0b" },
     { n: "เบนซิน 95", p: oilPrices.gasoline95, c: "#ef4444" },
     { n: "แก๊สโซฮอล์ 91", p: oilPrices.gasohol91, c: "#10b981" },
     { n: "แก๊สโซฮอล์ E20", p: oilPrices.e20, c: "#0ea5e9" },
     { n: "ดีเซล B7", p: oilPrices.diesel, c: "#484be9" },
     { n: "แก๊สโซฮอล์ E85", p: oilPrices.e85, c: "#ec4899" },
-    { n: "แก๊สโซฮอล์ 95 Premium", p: oilPrices.premium_gasohol_95, c: "#f43f5e" },    
+    {
+      n: "แก๊สโซฮอล์ 95 Premium",
+      p: oilPrices.premium_gasohol_95,
+      c: "#f43f5e",
+    },
     { n: "ดีเซล Premium", p: oilPrices.premium_diesel, c: "#8b5cf6" },
     { n: "NGV", p: oilPrices.ngv, c: "#7a7a7a" },
     { n: "ไฟฟ้า (EV)", p: oilPrices.electricity, c: "#00d2d3", u: "บาท/หน่วย" },
