@@ -411,5 +411,3 @@ function logout() {
   renderUserProfile();
   window.location.href = 'login.html';
 }
-
-
