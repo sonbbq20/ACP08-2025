@@ -29,6 +29,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     searchBtn.addEventListener("click", searchCar);
   }
+  // render profile UI
+  try { renderUserProfile(); } catch (e) { /* ignore */ }
 });
 
 function quickSearch(term) {
@@ -285,3 +287,129 @@ function renderOilPage() {
             </div>`;
   });
 }
+
+// ==========================================
+// 4. Simple client-side auth (localStorage)
+// ==========================================
+
+function getUsers() {
+  try {
+    const raw = localStorage.getItem("cw_users");
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveUsers(users) {
+  localStorage.setItem("cw_users", JSON.stringify(users));
+}
+
+function registerUser(e) {
+  e.preventDefault();
+  const name = (document.getElementById("reg-name") || {}).value || "";
+  const email = (document.getElementById("reg-email") || {}).value || "";
+  const pw = (document.getElementById("reg-password") || {}).value || "";
+  const pw2 = (document.getElementById("reg-password-confirm") || {}).value || "";
+
+  if (!email || !pw || !name) return alert("กรุณากรอกข้อมูลให้ครบ");
+  if (pw !== pw2) return alert("รหัสผ่านไม่ตรงกัน");
+
+  const users = getUsers();
+  const exists = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+  if (exists) return alert("มีอีเมลนี้ในระบบแล้ว โปรดล็อกอินหรือลองอีเมลอื่น");
+
+  users.push({ name: name.trim(), email: email.trim().toLowerCase(), password: pw });
+  saveUsers(users);
+  alert("สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ");
+  window.location.href = "login.html";
+}
+
+function loginUser(e) {
+  e.preventDefault();
+  const email = (document.getElementById("login-email") || {}).value || "";
+  const pw = (document.getElementById("login-password") || {}).value || "";
+  const remember = document.getElementById("remember") && document.getElementById("remember").checked;
+
+  if (!email || !pw) return alert("กรุณากรอกอีเมลและรหัสผ่าน");
+
+  const users = getUsers();
+  const user = users.find((u) => u.email.toLowerCase() === email.toLowerCase() && u.password === pw);
+  if (!user) return alert("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+
+  // Save simple session
+  localStorage.setItem("cw_currentUser", JSON.stringify({ name: user.name, email: user.email }));
+  if (remember) localStorage.setItem("cw_remember", "1");
+  else localStorage.removeItem("cw_remember");
+
+  // Redirect to homepage
+  window.location.href = "index.html";
+}
+
+// Mobile menu controls
+function toggleMobileMenu() {
+  const overlay = document.querySelector('.mobile-menu-overlay');
+  const menu = document.querySelector('.mobile-menu');
+  if (!overlay || !menu) return;
+  const open = menu.classList.toggle('open');
+  overlay.classList.toggle('open', open);
+}
+
+function closeMobileMenu() {
+  const overlay = document.querySelector('.mobile-menu-overlay');
+  const menu = document.querySelector('.mobile-menu');
+  if (!overlay || !menu) return;
+  menu.classList.remove('open');
+  overlay.classList.remove('open');
+}
+
+// Close menu when pressing Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeMobileMenu();
+});
+
+// User profile helpers
+function getCurrentUser() {
+  try { const raw = localStorage.getItem('cw_currentUser'); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+}
+
+function renderUserProfile() {
+  const user = getCurrentUser();
+  const area = document.getElementById('userArea');
+  const mobileFooter = document.querySelector('.mobile-menu-footer');
+  const mobileInfo = document.getElementById('mobileUserInfo');
+  if (area) {
+    if (user) {
+      area.innerHTML = `
+        <button class="user-btn" onclick="window.location.href='index.html'">
+          <div class="user-avatar">${(user.name||user.email||'U').charAt(0).toUpperCase()}</div>
+          <span class="user-name">${user.name}</span>
+        </button>
+        <a href="#" onclick="logout();return false;" class="btn-ghost">Logout</a>`;
+    } else {
+      area.innerHTML = `<a href="login.html" class="btn-ghost">Sign in</a>`;
+    }
+  }
+  if (mobileInfo) {
+    if (user) mobileInfo.innerHTML = `Signed in as <strong>${user.name}</strong> • <a href='#' onclick='logout();return false;'>Logout</a>`;
+    else mobileInfo.innerHTML = `<a href='login.html'>Sign in</a>`;
+  } else if (mobileFooter && user) {
+    // create mobileUserInfo if missing
+    const div = document.createElement('div');
+    div.id = 'mobileUserInfo';
+    div.style.fontSize = '0.95rem';
+    div.style.color = 'var(--text-secondary)';
+    div.innerHTML = `Signed in as <strong>${user.name}</strong> • <a href='#' onclick='logout();return false;'>Logout</a>`;
+    mobileFooter.prepend(div);
+  }
+}
+
+function logout() {
+  localStorage.removeItem('cw_currentUser');
+  localStorage.removeItem('cw_remember');
+  closeMobileMenu();
+  renderUserProfile();
+  window.location.href = 'login.html';
+}
+
+
