@@ -422,9 +422,9 @@ button#searchBtn:hover { transform: scale(1.05); }
     content: ''; position: absolute; top: 0; left: 0; width: 5px; height: 100%;
     background: var(--color-bar, #ccc);
 }
-.oil-name { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 10px; }
+.oil-name { font-size: 1.1rem; color: #ffffff; margin-bottom: 10px; }
 .oil-price { font-size: 2.5rem; font-weight: 700; color: var(--text-main); }
-.oil-unit { font-size: 1rem; color: var(--text-muted); }
+.oil-unit { font-size: 1rem; color: #cacccf; }
 .oil-diff { font-size: 0.9rem; margin-top: 10px; display: inline-block; padding: 4px 10px; border-radius: 20px; }
 .diff-up { color: #ff6b6b; background: rgba(255, 107, 107, 0.1); }
 .diff-down { color: #00d2d3; background: rgba(0, 210, 211, 0.1); }
