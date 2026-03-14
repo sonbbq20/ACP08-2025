@@ -141,7 +141,7 @@ function displayResults(cars) {
             <div class="car-content">
                 <div class="car-title">
                     <h3>${car.brand} ${car.model}</h3>
-                    <span class="car-year" style="font-size:0.8rem;color:#4a9eff;">${car.type || "N/A"}</span>
+                    <span class="car-year" style="font-size:0.8rem;color:#4a9eff;">${car.car_type || "N/A"}</span>
                 </div>
                 <div class="fuel-cost-box">
                     <span class="cost-label">ต้นทุนเชื้อเพลิง</span>
