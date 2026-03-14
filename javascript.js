@@ -55,8 +55,8 @@ async function searchCar() {
     '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #4a9eff;">🔄 กำลังค้นหาข้อมูลจาก Supabase...</div>';
 
   // 1. นำ URL และ Key จากขั้นตอนที่ 4 มาใส่ตรงนี้
-  const SUPABASE_URL = process.env.SUPABASE_URL;
-  const SUPABASE_KEY = process.env.SUPABASE_KEY;
+  const SUPABASE_URL = "https://fyaqsdqvircjanlasxov.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5YXFzZHF2aXJjamFubGFzeG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjUwMzcsImV4cCI6MjA4ODk0MTAzN30.pO9fF_ouzuOj5CbYhPZmCXMoVZFohFsk9cWj4Ur4dtQ";
 
   // 2. สร้าง URL สำหรับค้นหา (ilike คือการค้นหาแบบไม่สนพิมพ์เล็ก/ใหญ่ เหมือนคำสั่ง LIKE ใน SQL)
   const queryUrl = `${SUPABASE_URL}/rest/v1/cars?select=*&or=(brand.ilike.%25${input}%25,model.ilike.%25${input}%25)`;
