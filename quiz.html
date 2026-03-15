@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Car Personality Quiz</title>
+<link rel="stylesheet" href="quiz.css">
+</head>
+
+<body>
+
+<!-- QUIZ PAGE -->
+<div id="quizPage" class="page">
+
+<h1>🚗 คำถามเพื่อหารถที่เหมาะกับคุณ</h1>
+<p>ตอบคำถามต่อไปนี้ เพื่อหารถที่เข้ากับคุณ</p>
+
+<div class="form-grid">
+
+<div class="card">
+<h3>คุณใช้รถบ่อยมากแค่ไหน</h3>
+<label><input type="radio" name="use" value="city"> ใช้ทุกวัน</label>
+<label><input type="radio" name="use" value="city"> ใช้เกือบทุกวัน</label>
+<label><input type="radio" name="use" value="comfort"> ใช้แค่ช่วงวันหยุด</label>
+</div>
+
+<div class="card">
+<h3>คุณขับรถประมาณกี่กิโลเมตรต่อวัน</h3>
+<label><input type="radio" name="distance" value="city"> ต่ำกว่า 10 กิโลเมตร</label>
+<label><input type="radio" name="distance" value="eco"> 10-30 กิโลเมตร</label>
+<label><input type="radio" name="distance" value="performance"> มากกว่า 30 กิโลเมตร</label>
+</div>
+
+<div class="card">
+<h3>จุดประสงค์หลักของการใช้รถของคุณคืออะไร</h3>
+<label><input type="radio" name="purpose" value="city"> ขับไปทำงาน</label>
+<label><input type="radio" name="purpose" value="performance"> ใช้เชิงธุระกิจ</label>
+<label><input type="radio" name="purpose" value="suv"> ท่องเที่ยว</label>
+<label><input type="radio" name="purpose" value="family"> รับส่งคนในครอบครับ</label>
+</div>
+
+<div class="card">
+<h3>นิสัยการขับรถของคุณเป็นยังไง</h3>
+<label><input type="radio" name="style" value="comfort"> สบายๆ</label>
+<label><input type="radio" name="style" value="performance"> เน้นเร็ว</label>
+<label><input type="radio" name="style" value="safety"> เน้นความปลอดภัย</label>
+<label><input type="radio" name="style" value="eco"> เน้นประหยัดน้ำมัน</label>
+</div>
+
+<div class="card">
+<h3>ปรกติมีคนนั่งโดยสารไปกับคุณประมาณกี่คน</h3>
+<label><input type="radio" name="passengers" value="city"> คนเดียว</label>
+<label><input type="radio" name="passengers" value="comfort"> 2-3 คน</label>
+<label><input type="radio" name="passengers" value="family"> มากกว่า 4 คน</label>
+</div>
+
+<div class="card">
+<h3>คุณชอบเทคโนโลยีใหม่ๆ ของรถในยุคปัจจุบันหรือไม่</h3>
+<label><input type="radio" name="tech" value="technology"> ชอบมาก</label>
+<label><input type="radio" name="tech" value="technology"> ประมาณหนึ่ง</label>
+<label><input type="radio" name="tech" value="comfort"> ไม่ค่อยสนใจ</label>
+</div>
+
+<div class="card">
+<h3>ความสำคัญของต้นทุนของคุณ</h3>
+<label><input type="radio" name="cost" value="eco"> สำคัญมาก</label>
+<label><input type="radio" name="cost" value="comfort"> สำคัญประมาณหนึ่ง</label>
+<label><input type="radio" name="cost" value="performance"> ไม่เลย</label>
+</div>
+
+<div class="card">
+<h3>สนใจรถไฟฟ้าหรือไม่</h3>
+<label><input type="radio" name="ev" value="eco"> สนใจมาก</label>
+<label><input type="radio" name="ev" value="eco"> ประมาณหนึ่ง</label>
+<label><input type="radio" name="ev" value="performance"> ไม่ค่อยสนใจ</label>
+</div>
+
+<div class="card">
+<h3>บุคลิกของคุณเป็นยังไง</h3>
+<label><input type="radio" name="personality" value="eco"> เรียบง่าย</label>
+<label><input type="radio" name="personality" value="comfort"> คนรักความสบาย</label>
+<label><input type="radio" name="personality" value="performance"> โลดโผน</label>
+<label><input type="radio" name="personality" value="technology"> คนรักเทคโนโลยี</label>
+</div>
+
+<div class="card">
+<h3>คุณชอบรถดีไซน์ประมาณไหน</h3>
+<label><input type="radio" name="design" value="comfort"> หรูหรา</label>
+<label><input type="radio" name="design" value="performance"> สปอร์ต</label>
+<label><input type="radio" name="design" value="suv"> ลุยๆ</label>
+<label><input type="radio" name="design" value="technology"> ทันสมัย</label>
+</div>
+
+<button class="calc-btn" onclick="calculateQuiz()">ดูผลลัพธ์</button>
+
+<br><br>
+
+<button class="back-btn" onclick="window.location.href='index.html'">
+⬅ กลับหน้า CarWise
+</button>
+
+<div id="quizResult" class="result-box hidden"></div>
+
+
+<!-- RESULT PAGE -->
+<div id="resultPage" class="page hidden">
+
+<h1>🚗 ผลลัพธ์ของคุณ</h1>
+
+<div id="quizResult" class="result-box"></div>
+
+<button class="calc-btn" onclick="goBack()">ทำแบบทดสอบอีกครั้ง</button>
+
+</div>
+
+<script src="quiz.js"></script>
+
+</body>
+</html>

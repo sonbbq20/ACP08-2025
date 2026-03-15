@@ -1,0 +1,167 @@
+/* ===== CarWise Theme ===== */
+
+body{
+margin:0;
+font-family:Arial, Helvetica, sans-serif;
+background:linear-gradient(135deg,#081a36,#0b2b50);
+color:white;
+min-height:100vh;
+}
+
+/* ===== Page Layout ===== */
+
+.page{
+min-height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
+text-align:center;
+padding:40px;
+max-width:800px;
+margin:auto;
+}
+
+h1{
+color:#66c0ff;
+margin-bottom:10px;
+}
+
+/* ===== Quiz Container ===== */
+
+.quiz-container{
+max-width:700px;
+margin:auto;
+padding:40px 20px;
+text-align:center;
+}
+
+.quiz-title{
+font-size:38px;
+margin-bottom:10px;
+color:#3fa9ff;
+}
+
+.quiz-subtitle{
+opacity:0.8;
+margin-bottom:40px;
+}
+
+/* ===== Question Layout (Google Form Style) ===== */
+
+.form-grid{
+display:grid;
+grid-template-columns:1fr;
+gap:25px;
+margin-top:30px;
+width:100%;
+}
+
+/* ===== Question Card ===== */
+
+.card{
+background:#0f2a4a;
+padding:25px;
+border-radius:12px;
+text-align:left;
+box-shadow:0 8px 20px rgba(0,0,0,0.4);
+width:100%;
+}
+
+.card h3{
+color:#3fa9ff;
+margin-bottom:10px;
+}
+
+.card label{
+display:block;
+margin:10px 0;
+cursor:pointer;
+font-size:16px;
+}
+
+input[type="radio"]{
+margin-right:10px;
+}
+
+/* ===== Buttons ===== */
+
+.calc-btn{
+margin-top:30px;
+padding:15px 40px;
+font-size:18px;
+background:#3fa9ff;
+border:none;
+border-radius:30px;
+color:white;
+cursor:pointer;
+}
+
+.calc-btn:hover{
+background:#5bb6ff;
+}
+
+/* ===== Result Box ===== */
+
+.result-box{
+margin-top:30px;
+background:#0f2a4a;
+padding:30px;
+border-radius:15px;
+width:100%;
+max-width:600px;
+font-size:20px;
+line-height:1.7;
+}
+
+/* ===== Hidden ===== */
+
+.hidden{
+display:none;
+}
+
+.back-btn{
+margin-top:20px;
+padding:10px 25px;
+background:transparent;
+border:1px solid #3fa9ff;
+color:#3fa9ff;
+border-radius:20px;
+cursor:pointer;
+}
+
+.back-btn:hover{
+background:#3fa9ff;
+color:white;
+}
+
+.back-btn{
+margin-bottom:20px;
+padding:10px 25px;
+background:transparent;
+border:1px solid #3fa9ff;
+color:#3fa9ff;
+border-radius:20px;
+cursor:pointer;
+font-size:16px;
+}
+
+.back-btn:hover{
+background:#3fa9ff;
+color:white;
+}
+
+.back-btn{
+margin-top:15px;
+padding:12px 35px;
+background:transparent;
+border:1px solid #3fa9ff;
+color:#3fa9ff;
+border-radius:30px;
+cursor:pointer;
+font-size:16px;
+}
+
+.back-btn:hover{
+background:#3fa9ff;
+color:white;
+}
