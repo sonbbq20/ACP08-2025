@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
+
 <head>
+<meta charset="UTF-8">
 <title>Car Personality Quiz</title>
 <link rel="stylesheet" href="quiz.css">
 </head>
@@ -84,21 +86,20 @@
 <div class="card">
 <h3>คุณชอบรถดีไซน์ประมาณไหน</h3>
 <label><input type="radio" name="design" value="comfort"> หรูหรา</label>
-<label><input type="radio" name="design" value="performance"> สปอร์ต</label>
-<label><input type="radio" name="design" value="suv"> ลุยๆ</label>
-<label><input type="radio" name="design" value="technology"> ทันสมัย</label>
+<label><input type="radio" name="design" value="performance"> สปอร์ด</label>
+<label><input type="radio" name="design" value="suv"> ทนทาน</label>
+<label><input type="radio" name="design" value="technology"> โมเดล</label>
+</div>
+
 </div>
 
 <button class="calc-btn" onclick="calculateQuiz()">ดูผลลัพธ์</button>
 
 <br><br>
 
-<button class="back-btn" onclick="window.location.href='index.html'">
-⬅ กลับหน้า CarWise
-</button>
+<button class="back-btn" onclick="window.location.href='index.html'">⬅ กลับหน้า CarWise</button>
 
-<div id="quizResult" class="result-box hidden"></div>
-
+</div>
 
 <!-- RESULT PAGE -->
 <div id="resultPage" class="page hidden">
@@ -107,7 +108,11 @@
 
 <div id="quizResult" class="result-box"></div>
 
-<button class="calc-btn" onclick="goBack()">ทำแบบทดสอบอีกครั้ง</button>
+<button class="calc-btn" onclick="goBack()">🔙 ทำแบบทดสอบใหม่</button>
+
+<br><br>
+
+<button class="back-btn" onclick="window.location.href='index.html'">⬅ กลับหน้า CarWise</button>
 
 </div>
 
