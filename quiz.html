@@ -4,11 +4,55 @@
 <head>
 <meta charset="UTF-8">
 <title>Car Personality Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
 
+    <div class="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                </div>
+                CarWise
+            </a>
+            <button class="mobile-menu-close" onclick="closeMobileMenu()">✕</button>
+        </div>
+        <nav class="mobile-menu-nav">
+            <a href="index.html">🔍 ค้นหารถ</a>
+            <a href="oil.html">⛽ ราคาน้ำมัน</a>
+            <a href="quiz.html">🚗 หารถที่เข้ากับคุณ</a>
+        </nav>
+        <div class="mobile-menu-footer">
+            <div id="mobileUserInfo" style="font-size:0.9rem;color:var(--text-secondary);">CarWise</div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <div class="logo">CarWise <span class="badge">TH</span></div>
+        <div class="nav-menu">
+            <a href="index.html" class="nav-link">🔍 ค้นหารถ</a>
+            <a href="oil.html" class="nav-link">⛽ ราคาน้ำมัน</a>
+            <a href="quiz.html" class="nav-link active">🚗 หารถที่เข้ากับคุณ</a>
+        </div>
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Open menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <div class="nav-right" id="navRight">
+            <div id="userArea"></div>
+        </div>
+    </nav>
 <!-- QUIZ PAGE -->
 <div id="quizPage" class="page">
 
@@ -95,10 +139,6 @@
 
 <button class="calc-btn" onclick="calculateQuiz()">ดูผลลัพธ์</button>
 
-<br><br>
-
-<button class="back-btn" onclick="window.location.href='index.html'">⬅ กลับหน้า CarWise</button>
-
 </div>
 
 <!-- RESULT PAGE -->
@@ -116,6 +156,7 @@
 
 </div>
 
+<script src="javascript.js"></script>
 <script src="quiz.js"></script>
 
 </body>
