@@ -45,8 +45,11 @@ function calculateQuiz() {
   result += "</ul>";
 
   document.getElementById("quizResult").innerHTML = result;
+  // Get budget
+  const budget = document.getElementById("budgetSelect").value || 99999999;
+  
 // Fetch and display recommended cars based on top traits (Top 2 traits passed)
-fetchRecommendedCars(top3);
+fetchRecommendedCars(top3, budget);
   document.getElementById("quizPage").classList.add("hidden");
   document.getElementById("resultPage").classList.remove("hidden");
 }
@@ -63,7 +66,7 @@ function goMain() {
   document.getElementById("mainPage").classList.remove("hidden");
 }
 
-async function fetchRecommendedCars(topTraits) {
+async function fetchRecommendedCars(topTraits, budget = 99999999) {
   const SUPABASE_URL = "https://fyaqsdqvircjanlasxov.supabase.co";
   const SUPABASE_KEY =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5YXFzZHF2aXJjamFubGFzeG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjUwMzcsImV4cCI6MjA4ODk0MTAzN30.pO9fF_ouzuOj5CbYhPZmCXMoVZFohFsk9cWj4Ur4dtQ";
@@ -91,6 +94,10 @@ async function fetchRecommendedCars(topTraits) {
   const p2 = trait2 ? getQueryPart(trait2) : null;
 
   let queryParts = [];
+  
+  // Add Budget Filter
+  queryParts.push(`price=lte.${budget}`);
+
   if (p1) queryParts.push(p1.q);
   
   // Combine logic:
@@ -108,6 +115,7 @@ async function fetchRecommendedCars(topTraits) {
   if(trait1 === 'performance') queryParts.push("order=hp.desc");
   else if(trait1 === 'eco') queryParts.push("order=efficiency.desc");
   else if(trait1 === 'price') queryParts.push("order=price.asc");
+  else queryParts.push("order=price.desc"); // Default sort by price descending to show best cars in budget
   
   // Always limit
   if(!queryParts.some(p => p.includes("limit"))) queryParts.push("limit=4");

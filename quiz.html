@@ -28,16 +28,16 @@
         </div>
         <nav class="mobile-menu-nav">
             <a href="index.html" class="nav-link">
-                <img src="icon-images\car.png"  alt="Search" class="nav-icon">
-                 ค้นหารถ
+                <img src="icon-images\car.png" alt="Search" class="nav-icon">
+                ค้นหารถ
             </a>
             <a href="oil.html" class="nav-link">
-                <img src="icon-images\oil-barrel.png"  alt="Oil" class="nav-icon">
-                 ราคาน้ำมัน
+                <img src="icon-images\oil-barrel.png" alt="Oil" class="nav-icon">
+                ราคาน้ำมัน
             </a>
             <a href="quiz.html" class="nav-link active">
-                <img src="icon-images/ideas.png"  alt="Quiz" class="nav-icon">
-                 หารถที่เข้ากับคุณ
+                <img src="icon-images/ideas.png" alt="Quiz" class="nav-icon">
+                หารถที่เข้ากับคุณ
             </a>
         </nav>
         <div class="mobile-menu-footer">
@@ -49,16 +49,16 @@
         <div class="logo">CarWise <span class="badge">TH</span></div>
         <div class="nav-menu">
             <a href="index.html" class="nav-link">
-                <img src="icon-images\car.png"  alt="Search" class="nav-icon">
-                 ค้นหารถ
+                <img src="icon-images\car.png" alt="Search" class="nav-icon">
+                ค้นหารถ
             </a>
             <a href="oil.html" class="nav-link">
-                <img src="icon-images\oil-barrel.png"  alt="Oil" class="nav-icon">
-                 ราคาน้ำมัน
+                <img src="icon-images\oil-barrel.png" alt="Oil" class="nav-icon">
+                ราคาน้ำมัน
             </a>
             <a href="quiz.html" class="nav-link active">
-                <img src="icon-images/ideas.png"  alt="Quiz" class="nav-icon">
-                 หารถที่เข้ากับคุณ
+                <img src="icon-images/ideas.png" alt="Quiz" class="nav-icon">
+                หารถที่เข้ากับคุณ
             </a>
         </div>
         <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Open menu">
@@ -75,36 +75,39 @@
     <!-- QUIZ PAGE -->
     <div id="quizPage" class="page">
 
-        <h1>🚗 คำถามเพื่อหารถที่เหมาะกับคุณ</h1>
+        <h1>
+            <img src="icon-images/tablet.png" alt="Quiz" class="logo-icon">
+            คำถามเพื่อหารถที่เหมาะกับคุณ
+        </h1>
         <p>ตอบคำถามต่อไปนี้ เพื่อหารถที่เข้ากับคุณ</p>
 
         <div class="form-grid">
 
             <div class="card">
                 <h3>คุณใช้รถบ่อยมากแค่ไหน</h3>
-                <label><input type="radio" name="use" value="city"> ใช้ทุกวัน</label>
+                <label><input type="radio" name="use" value="city" checked> ใช้ทุกวัน</label>
                 <label><input type="radio" name="use" value="city"> ใช้เกือบทุกวัน</label>
                 <label><input type="radio" name="use" value="comfort"> ใช้แค่ช่วงวันหยุด</label>
             </div>
 
             <div class="card">
                 <h3>คุณขับรถประมาณกี่กิโลเมตรต่อวัน</h3>
-                <label><input type="radio" name="distance" value="city"> ต่ำกว่า 10 กิโลเมตร</label>
+                <label><input type="radio" name="distance" value="city" checked> ต่ำกว่า 10 กิโลเมตร</label>
                 <label><input type="radio" name="distance" value="eco"> 10-30 กิโลเมตร</label>
                 <label><input type="radio" name="distance" value="performance"> มากกว่า 30 กิโลเมตร</label>
             </div>
 
             <div class="card">
                 <h3>จุดประสงค์หลักของการใช้รถของคุณคืออะไร</h3>
-                <label><input type="radio" name="purpose" value="city"> ขับไปทำงาน</label>
+                <label><input type="radio" name="purpose" value="city" checked> ขับไปทำงาน</label>
                 <label><input type="radio" name="purpose" value="performance"> ใช้เชิงธุระกิจ</label>
                 <label><input type="radio" name="purpose" value="suv"> ท่องเที่ยว</label>
-                <label><input type="radio" name="purpose" value="family"> รับส่งคนในครอบครับ</label>
+                <label><input type="radio" name="purpose" value="family"> รับส่งคนในครอบครัว</label>
             </div>
 
             <div class="card">
                 <h3>นิสัยการขับรถของคุณเป็นยังไง</h3>
-                <label><input type="radio" name="style" value="comfort"> สบายๆ</label>
+                <label><input type="radio" name="style" value="comfort" checked> สบายๆ</label>
                 <label><input type="radio" name="style" value="performance"> เน้นเร็ว</label>
                 <label><input type="radio" name="style" value="safety"> เน้นความปลอดภัย</label>
                 <label><input type="radio" name="style" value="eco"> เน้นประหยัดน้ำมัน</label>
@@ -112,50 +115,59 @@
 
             <div class="card">
                 <h3>ปรกติมีคนนั่งโดยสารไปกับคุณประมาณกี่คน</h3>
-                <label><input type="radio" name="passengers" value="city"> คนเดียว</label>
+                <label><input type="radio" name="passengers" value="city" checked> คนเดียว</label>
                 <label><input type="radio" name="passengers" value="comfort"> 2-3 คน</label>
                 <label><input type="radio" name="passengers" value="family"> มากกว่า 4 คน</label>
             </div>
 
             <div class="card">
                 <h3>คุณชอบเทคโนโลยีใหม่ๆ ของรถในยุคปัจจุบันหรือไม่</h3>
-                <label><input type="radio" name="tech" value="technology"> ชอบมาก</label>
+                <label><input type="radio" name="tech" value="technology" checked> ชอบมาก</label>
                 <label><input type="radio" name="tech" value="technology"> ประมาณหนึ่ง</label>
                 <label><input type="radio" name="tech" value="comfort"> ไม่ค่อยสนใจ</label>
             </div>
 
             <div class="card">
                 <h3>ความสำคัญของต้นทุนของคุณ</h3>
-                <label><input type="radio" name="cost" value="eco"> สำคัญมาก</label>
+                <label><input type="radio" name="cost" value="eco" checked> สำคัญมาก</label>
                 <label><input type="radio" name="cost" value="comfort"> สำคัญประมาณหนึ่ง</label>
                 <label><input type="radio" name="cost" value="performance"> ไม่เลย</label>
             </div>
 
             <div class="card">
                 <h3>สนใจรถไฟฟ้าหรือไม่</h3>
-                <label><input type="radio" name="ev" value="eco"> สนใจมาก</label>
+                <label><input type="radio" name="ev" value="eco" checked> สนใจมาก</label>
                 <label><input type="radio" name="ev" value="eco"> ประมาณหนึ่ง</label>
                 <label><input type="radio" name="ev" value="performance"> ไม่ค่อยสนใจ</label>
             </div>
 
             <div class="card">
                 <h3>บุคลิกของคุณเป็นยังไง</h3>
-                <label><input type="radio" name="personality" value="eco"> เรียบง่าย</label>
+                <label><input type="radio" name="personality" value="eco" checked> เรียบง่าย</label>
                 <label><input type="radio" name="personality" value="comfort"> คนรักความสบาย</label>
-                <label><input type="radio" name="personality" value="performance"> โลดโผน</label>
+                <label><input type="radio" name="personality" value="performance"> ผจญภัย</label>
                 <label><input type="radio" name="personality" value="technology"> คนรักเทคโนโลยี</label>
             </div>
 
             <div class="card">
                 <h3>คุณชอบรถดีไซน์ประมาณไหน</h3>
-                <label><input type="radio" name="design" value="comfort"> หรูหรา</label>
+                <label><input type="radio" name="design" value="comfort" checked> หรูหรา</label>
                 <label><input type="radio" name="design" value="performance"> สปอร์ด</label>
                 <label><input type="radio" name="design" value="suv"> ทนทาน</label>
-                <label><input type="radio" name="design" value="technology"> โมเดล</label>
+                <label><input type="radio" name="design" value="technology"> โมเดิล</label>
             </div>
-
+            <div class="card">
+                <h3>งบประมาณที่คุณตั้งไว้ (บาท)</h3>
+                <select id="budgetSelect"
+                    style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(33, 32, 32, 0.2); color: #fff; margin-top: 10px;">
+                    <option value="1000000" class="option">ไม่เกิน 1 ล้านบาท</option>
+                    <option value="2000000" class="option" selected>ไม่เกิน 2 ล้านบาท</option>
+                    <option value="3000000" class="option">ไม่เกิน 3 ล้านบาท</option>
+                    <option value="5000000" class="option">ไม่เกิน 5 ล้านบาท</option>
+                    <option value="99999999" class="option">ไม่จำกัดงบประมาณ</option>
+                </select>
+            </div>
         </div>
-
         <button class="calc-btn" onclick="calculateQuiz()">ดูผลลัพธ์</button>
 
     </div>
@@ -163,12 +175,17 @@
     <!-- RESULT PAGE -->
     <div id="resultPage" class="page hidden">
 
-        <h1>🚗 ผลลัพธ์ของคุณ</h1>
+        <h1>
+            <img src="icon-images/tablet.png" alt="Quiz" class="logo-icon">
+            คำถามเพื่อหารถที่เหมาะกับคุณ
+        </h1>
 
         <div id="quizResult" class="result-box"></div>
         <div id="recommendedContainer"></div>
 
-        <button class="calc-btn" onclick="goBack()">🔙 ทำแบบทดสอบใหม่</button>
+        <button class="calc-btn" onclick="goBack()">
+            <img src="icon-images/back.png" alt="Quiz" class="nav-icon" style="bottom: 8px;">
+            ทำแบบทดสอบใหม่</button>
 
     </div>
 
