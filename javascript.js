@@ -153,7 +153,7 @@ function displayResults(cars) {
                     <div>⛽ ${fuelName}</div>
                     <div>⚡ ${car.efficiency} กม./${unit}</div>
                     <div>🐎 ${car.hp} แรงม้า</div>
-                    <div>🚀 0-100: ${car.acc_0_100} วิ</div>
+                    <div>🚀 0-100: ${car.acc_0_100} วินาที</div>
                 </div>
             </div>
         `;
