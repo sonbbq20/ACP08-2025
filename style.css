@@ -837,7 +837,7 @@ width:100%;
 /* ===== Question Card ===== */
 
 .card{
-background:#0f2a4a;
+background:var(--dark-bg);
 padding:25px;
 border-radius:12px;
 text-align:left;
@@ -846,7 +846,7 @@ width:100%;
 }
 
 .card h3{
-color:#3fa9ff;
+color:var(--accent);
 margin-bottom:10px;
 }
 
@@ -867,22 +867,26 @@ margin-right:10px;
 margin-top:30px;
 padding:15px 40px;
 font-size:18px;
-background:#3fa9ff;
+background:#48a9f9;
 border:none;
 border-radius:30px;
 color:white;
 cursor:pointer;
+transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
 }
 
 .calc-btn:hover{
-background:#5bb6ff;
+transform: scale(1.05);
+border-color: var(--primary);
+box-shadow: 0px 10px 10px rgba(63, 169, 255, 0.4);
 }
+
 
 /* ===== Result Box ===== */
 
 .result-box{
 margin-top:30px;
-background:#0f2a4a;
+background:var(--dark-bg);
 padding:30px;
 border-radius:15px;
 width:100%;
@@ -901,14 +905,15 @@ display:none;
 margin-top:20px;
 padding:10px 25px;
 background:transparent;
-border:1px solid #3fa9ff;
-color:#3fa9ff;
+border:1px solid var(--accent);
+color:var(--accent);
 border-radius:20px;
 cursor:pointer;
+transition: background 0.3s, color 0.3s;
 }
 
 .back-btn:hover{
-background:#3fa9ff;
+background:var(--accent);
 color:white;
 }
 
@@ -916,15 +921,16 @@ color:white;
 margin-bottom:20px;
 padding:10px 25px;
 background:transparent;
-border:1px solid #3fa9ff;
-color:#3fa9ff;
+border:1px solid var(--accent);
+color:var(--accent);
 border-radius:20px;
 cursor:pointer;
 font-size:16px;
+transition: background 0.3s, color 0.3s;
 }
 
 .back-btn:hover{
-background:#3fa9ff;
+background:var(--accent);
 color:white;
 }
 
@@ -932,14 +938,15 @@ color:white;
 margin-top:15px;
 padding:12px 35px;
 background:transparent;
-border:1px solid #3fa9ff;
-color:#3fa9ff;
+border:1px solid var(--accent);
+color:var(--accent);
 border-radius:30px;
 cursor:pointer;
 font-size:16px;
+transition: background 0.3s, color 0.3s;
 }
 
 .back-btn:hover{
-background:#3fa9ff;
+background:var(--accent);
 color:white;
 }
