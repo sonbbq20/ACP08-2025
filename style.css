@@ -950,3 +950,14 @@ transition: background 0.3s, color 0.3s;
 background:var(--accent);
 color:white;
 }
+
+/* nav icon */
+
+.nav-icon{
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    top: 5px;
+    right: 2px;
+    position: relative;
+}
