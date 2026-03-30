@@ -46,7 +46,8 @@
     </div>
 
     <nav class="navbar">
-        <div class="logo">CarWise <span class="badge">TH</span></div>
+        <div class="logo">
+            CarWise <span class="badge">TH</span></div>
         <div class="nav-menu">
             <a href="index.html" class="nav-link active">
                 <img src="icon-images\car.png"  alt="Search" class="nav-icon">
@@ -75,7 +76,7 @@
 
     <div class="hero">
         <div class="hero-content">
-            <h1>ค้นหารถคู่ใจ <br><span class="highlight">คำนวณความคุ้มค่า</span></h1>
+            <h1 style="font-size: 3.25rem;">ค้นหารถคู่ใจ <br><span class="highlight">คำนวณความคุ้มค่า</span></h1>
             <p class="subtitle">เช็คสเปครถพร้อมคำนวณค่าน้ำมันเฉลี่ยต่อกิโลเมตร</p>
 
             <div class="search-container">
@@ -101,7 +102,38 @@
         </div>
     </div>
 
+    <!-- รถยอดนิยมแบ่งตามประเภท -->
+    <div class="container" id="popularCarsSection">
+        <h2 style="text-align: center; margin-bottom: 40px; font-size: 2.2rem;">🔥 รถที่น่าสนใจและยอดนิยม</h2>
+        
+        <div class="category-box" style="--cat-color: var(--primary);">
+            <div class="category-header">
+                <div class="category-icon">⛽</div>
+                <h3>รถยนต์สันดาป (Gasoline)</h3>
+            </div>
+            <div id="popularGasoline" class="result-grid"></div>
+        </div>
+
+        <div class="category-box" style="--cat-color: #10b981;">
+            <div class="category-header">
+                <div class="category-icon">🔋</div>
+                <h3>รถยนต์ไฮบริด (Hybrid)</h3>
+            </div>
+            <div id="popularHybrid" class="result-grid"></div>
+        </div>
+
+        <div class="category-box" style="--cat-color: var(--accent);">
+            <div class="category-header">
+                <div class="category-icon">⚡</div>
+                <h3>รถยนต์ไฟฟ้า (EV)</h3>
+            </div>
+            <div id="popularEV" class="result-grid"></div>
+        </div>
+    </div>
+
     <div class="container">
+        <!-- Search Results will overwrite or appear here -->
+        <h2 id="searchResultsTitle" style="display: none; margin-bottom: 20px;">ผลการค้นหา</h2>
         <div id="result" class="result-grid"></div>
     </div>
 
