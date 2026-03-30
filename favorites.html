@@ -17,26 +17,61 @@
       <a href="index.html" class="logo"><div class="logo-icon">CarWise</div></a>
       <button class="mobile-menu-close" onclick="closeMobileMenu()">✕</button>
     </div>
-    <nav class="mobile-menu-nav">
-      <a href="index.html" class="nav-link">ค้นหารถ</a>
-      <a href="oil.html" class="nav-link">ราคาน้ำมัน</a>
-      <a href="quiz.html" class="nav-link">หารถที่เข้ากับคุณ</a>
-      <a href="favorites.html" class="nav-link active">รายการโปรด</a>
-    </nav>
-    <div class="mobile-menu-footer"><div id="mobileUserInfo" style="font-size:0.9rem;color:var(--text-secondary);">CarWise</div></div>
-  </div>
-
-  <nav class="navbar">
-    <div class="logo">CarWise <span class="badge">TH</span></div>
-    <div class="nav-menu">
-      <a href="index.html" class="nav-link">ค้นหารถ</a>
-      <a href="oil.html" class="nav-link">ราคาน้ำมัน</a>
-      <a href="quiz.html" class="nav-link">หารถที่เข้ากับคุณ</a>
-      <a href="favorites.html" class="nav-link active">รายการโปรด</a>
+     <nav class="mobile-menu-nav">
+            <a href="index.html" class="nav-link">
+                <img src="icon-images\car.png"  alt="Search" class="nav-icon">
+                 ค้นหารถ
+            </a>
+            <a href="oil.html" class="nav-link">
+                <img src="icon-images\oil-barrel.png"  alt="Oil" class="nav-icon">
+                 ราคาน้ำมัน
+            </a>
+            <a href="quiz.html" class="nav-link">
+                <img src="icon-images/ideas.png"  alt="Quiz" class="nav-icon">
+                 หารถที่เข้ากับคุณ
+            </a>
+            <a href="favorites.html" class="nav-link active">
+                <img src="icon-images/star.png"  alt="Saved" class="nav-icon">
+                 รายการโปรด
+            </a>
+        </nav>
+        <div class="mobile-menu-footer">
+            <div id="mobileUserInfo" style="font-size:0.9rem;color:var(--text-secondary);">CarWise</div>
+        </div>
     </div>
-    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Open menu">☰</button>
-    <div class="nav-right" id="navRight"><div id="userArea"></div></div>
-  </nav>
+
+    <nav class="navbar">
+        <div class="logo">
+            CarWise <span class="badge">TH</span></div>
+        <div class="nav-menu">
+            <a href="index.html" class="nav-link">
+                <img src="icon-images\car.png"  alt="Search" class="nav-icon">
+                 ค้นหารถ
+            </a>
+            <a href="oil.html" class="nav-link">
+                <img src="icon-images\oil-barrel.png"  alt="Oil" class="nav-icon">
+                 ราคาน้ำมัน
+            </a>
+            <a href="quiz.html" class="nav-link">
+                <img src="icon-images/ideas.png"  alt="Quiz" class="nav-icon">
+                 หารถที่เข้ากับคุณ
+            </a>
+            <a href="favorites.html" class="nav-link active">
+                <img src="icon-images/star.png" alt="Saved" class="nav-icon">
+                 รายการโปรด
+            </a>
+        </div>
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Open menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <div class="nav-right" id="navRight">
+            <div id="userArea"></div>
+        </div>
+    </nav>
 
   <div class="container" style="padding-top:50px;">
     <div class="page-header"><h1>รายการโปรดของฉัน</h1><p class="subtitle">รายการรถที่คุณบันทึกไว้</p></div>
