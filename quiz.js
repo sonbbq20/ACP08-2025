@@ -187,10 +187,19 @@ async function fetchRecommendedCars(topTraits, budget = 99999999) {
 }
 
 function displayRecommendedCars(cars) {
-    const container = document.getElementById("recommendedContainer");
-    container.innerHTML = "";
-  
-    const prices =
+  const container = document.getElementById("recommendedContainer");
+  container.innerHTML = "";
+
+  // ==========================
+  // 📏 ระยะทางต่อปี (value1)
+  // ==========================
+  const selected = document.querySelector('input[name="distance"]:checked');
+  const value1 = selected ? Number(selected.getAttribute("value1")) : 0;
+
+  // ==========================
+  // ⛽ ราคาน้ำมัน (realtime fallback)
+  // ==========================
+  const prices =
     typeof oilPrices !== "undefined"
       ? oilPrices
       : {
@@ -205,6 +214,9 @@ function displayRecommendedCars(cars) {
     let fuelName = "เบนซิน";
     let unit = "ลิตร";
 
+    // ==========================
+    // 🔥 FUEL TYPE MAPPING
+    // ==========================
     if (car.fuel === "ev") {
       fuelPrice = prices.electricity;
       fuelName = "ไฟฟ้า (EV)";
@@ -213,16 +225,39 @@ function displayRecommendedCars(cars) {
       fuelPrice = prices.diesel;
       fuelName = "ดีเซล";
     } else if (car.fuel === "hybrid") {
-      fuelName = "ไฮบริด";
+      fuelName = "ไฮบริด (Gasohol 95)";
       fuelPrice = prices.gasohol95;
     } else if (car.fuel === "gas91") {
       fuelName = "แก๊สโซฮอล์ 91";
       fuelPrice = prices.gasohol91;
     }
 
-    const costPerKm = (fuelPrice / car.efficiency).toFixed(2);
+    // กัน error
+    if (!car.efficiency || car.efficiency <= 0) return;
+
+    // ==========================
+    // 💰 CALCULATION
+    // ==========================
+    const costPerKm = fuelPrice / car.efficiency;
+
+    // ⭐ คำนวณค่าน้ำมันต่อปี
+    const yearlyCost = value1 * fuelPrice / car.efficiency;
+
+    // ⭐ คำนวณต่อเดือน (เพิ่มความโปร)
+    const monthlyCost = yearlyCost / 12;
+
+    // format
+    const costPerKmDisplay = costPerKm.toFixed(2);
+    const yearlyCostDisplay = yearlyCost.toLocaleString();
+    const monthlyCostDisplay = monthlyCost.toLocaleString(undefined, {
+      maximumFractionDigits: 0,
+    });
+
     const priceStr = car.price ? car.price.toLocaleString() : "N/A";
 
+    // ==========================
+    // 🖼️ IMAGE
+    // ==========================
     let imgUrl = "";
     if (car.image_url && car.image_url.trim() !== "") {
       imgUrl = car.image_url;
@@ -230,64 +265,127 @@ function displayRecommendedCars(cars) {
       const imgQuery = `${car.brand} ${car.model} 2024 side view`;
       imgUrl = `https://tse2.mm.bing.net/th?q=${encodeURIComponent(
         imgQuery
-      )}&w=500&h=300&c=7&rs=1&p=0`;
+      )}&w=500&h=300`;
     }
 
-    const card = document.createElement("div");
-    card.className = "car-card";
-    // Unique id
-    const carId = car.id || `${(car.brand||'').replace(/\s+/g,'_')}_${(car.model||'').replace(/\s+/g,'_')}`;
-    const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    // ==========================
+    // ❤️ FAVORITE LOGIC
+    // ==========================
+    const carId =
+      car.id ||
+      `${(car.brand || "").replace(/\s+/g, "_")}_${(car.model || "").replace(
+        /\s+/g,
+        "_"
+      )}`;
+
+    const currentUser =
+      typeof getCurrentUser === "function" ? getCurrentUser() : null;
+
     const userEmail = currentUser ? currentUser.email : null;
-    const favs = userEmail ? (typeof getFavoritesForUser === 'function' ? getFavoritesForUser(userEmail) : []) : [];
+
+    const favs = userEmail
+      ? typeof getFavoritesForUser === "function"
+        ? getFavoritesForUser(userEmail)
+        : []
+      : [];
+
     const isFav = favs.includes(carId);
 
-    card.innerHTML = `
-        <div class="car-img-wrapper">
-          <img src="${imgUrl}" onerror="this.src='https://placehold.co/600x400?text=${car.brand}'" alt="${car.brand} ${car.model}">
-          <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.8);color:#fff;padding:4px 8px;border-radius:4px;font-size:0.8rem;">
-            ฿${priceStr}
-          </div>
-        </div>
-        <div class="car-content">
-          <div class="car-title">
-            <h3>${car.brand} ${car.model}</h3>
-            <span class="car-year" style="font-size:0.8rem;color:#4a9eff;">${car.car_type || "N/A"}</span>
-          </div>
-          <div class="fuel-cost-box">
-            <span class="cost-label">ต้นทุนเชื้อเพลิง</span>
-            <span class="cost-value">${costPerKm}</span> <span class="cost-unit">บาท/กม.</span>
-          </div>
-          <div class="specs-grid" style="grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem;">
-            <div>⛽ ${fuelName}</div>
-            <div>⚡ ${car.efficiency} กม./${unit}</div>
-            <div>🐎 ${car.hp} แรงม้า</div>
-            <div>⏱️ 0-100: ${car.acc_0_100} วินาที</div>
-          </div>
-          <div style="margin-top:12px; display:flex; justify-content:flex-end; align-items:center; gap:8px;">
-            ${ userEmail ? `<button class=\"fav-btn\" data-carid=\"${carId}\" aria-label=\"Save to favorites\" style=\"background:transparent;border:none;cursor:pointer;font-size:1.4rem;color:${isFav? '#ffd166':'#94a3b8'}\">${isFav? '★':'☆'}</button>` : '' }
-          </div>
-        </div>
-      `;
+    // ==========================
+    // 🎨 UI
+    // ==========================
+    const card = document.createElement("div");
+    card.className = "car-card";
 
-    setTimeout(()=>{
-      const btn = card.querySelector('.fav-btn');
-      if(btn){
-      btn.addEventListener('click',(e)=>{
-        e.stopPropagation();
-        if(!userEmail){ alert('กรุณาเข้าสู่ระบบเพื่อบันทึกรายการโปรด'); return; }
-        const id = btn.getAttribute('data-carid');
-        const now = getFavoritesForUser(userEmail);
-        const idx = now.findIndex(x => x.id === id);
-        if(idx===-1){
-          const obj = { id: id, brand: car.brand, model: car.model, price: car.price, efficiency: car.efficiency, fuel: car.fuel, image_url: car.image_url, hp: car.hp, acc_0_100: car.acc_0_100, car_type: car.car_type };
-          now.push(obj);
-          btn.textContent='★'; btn.style.color='#ffd166';
-        } else { now.splice(idx,1); btn.textContent='☆'; btn.style.color='#94a3b8'; }
-        saveFavoritesForUser(userEmail, now);
-      });
+    card.innerHTML = `
+      <div class="car-img-wrapper">
+        <img src="${imgUrl}" 
+             onerror="this.src='https://placehold.co/600x400?text=${car.brand}'">
+        <div style="position:absolute;top:10px;right:10px;
+             background:rgba(0,0,0,0.8);color:#fff;
+             padding:4px 8px;border-radius:4px;font-size:0.8rem;">
+          ฿${priceStr}
+        </div>
+      </div>
+
+      <div class="car-content">
+        <div class="car-title">
+          <h3>${car.brand} ${car.model}</h3>
+          <span style="font-size:0.8rem;color:#4a9eff;">
+            ${car.car_type || "N/A"}
+          </span>
+        </div>
+
+        <div class="fuel-cost-box">
+          <span class="cost-label">ต้นทุนเชื้อเพลิง</span>
+          <span class="cost-value">${costPerKmDisplay}</span>
+          <span class="cost-unit">บาท/กม.</span>
+        </div>
+
+        <div class="specs-grid" style="grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem;">
+          <div>⛽ ${fuelName}</div>
+          <div>⚡ ${car.efficiency} กม./${unit}</div>
+          <div>🐎 ${car.hp} แรงม้า</div>
+          <div>⏱️ 0-100: ${car.acc_0_100} วินาที</div>
+
+          <!-- 🔥 ค่าน้ำมัน -->
+          <div style="grid-column:1/-1;color:#4a9eff;font-weight:bold;">
+            ต่อปี ≈ ${yearlyCostDisplay} บาท
+          </div>
+
+          <div style="grid-column:1/-1;color:#22c55e;">
+            ต่อเดือน ≈ ${monthlyCostDisplay} บาท
+          </div>
+        </div>
+
+        <div style="margin-top:12px; display:flex; justify-content:flex-end;">
+          ${
+            userEmail
+              ? `<button class="fav-btn" data-carid="${carId}"
+                 style="background:none;border:none;cursor:pointer;
+                 font-size:1.4rem;color:${isFav ? "#ffd166" : "#94a3b8"}">
+                 ${isFav ? "★" : "☆"}
+               </button>`
+              : ""
+          }
+        </div>
+      </div>
+    `;
+
+    // ==========================
+    // ❤️ FAVORITE CLICK
+    // ==========================
+    setTimeout(() => {
+      const btn = card.querySelector(".fav-btn");
+      if (btn) {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+
+          if (!userEmail) {
+            alert("กรุณาเข้าสู่ระบบ");
+            return;
+          }
+
+          const id = btn.getAttribute("data-carid");
+          const now = getFavoritesForUser(userEmail);
+
+          const idx = now.findIndex((x) => x.id === id);
+
+          if (idx === -1) {
+            now.push({ id, ...car });
+            btn.textContent = "★";
+            btn.style.color = "#ffd166";
+          } else {
+            now.splice(idx, 1);
+            btn.textContent = "☆";
+            btn.style.color = "#94a3b8";
+          }
+
+          saveFavoritesForUser(userEmail, now);
+        });
       }
-    },0);
+    }, 0);
+
     container.appendChild(card);
   });
 }
