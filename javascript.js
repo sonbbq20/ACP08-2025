@@ -594,7 +594,7 @@ function renderUserProfile() {
     } else {
       headerUser.innerHTML = `
         <a href="login.html" style="background-color: var(--primary); color: white; padding: 6px 14px; border-radius: 20px; text-decoration: none; font-size: 0.9rem; font-weight: 500; display: inline-block;">
-          เข้าสู่ระบบ
+        Login
         </a>
       `;
     }
