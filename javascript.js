@@ -174,12 +174,14 @@ function displayPopularSection(cars, containerId) {
     const costPerKm = (fuelPrice / car.efficiency).toFixed(2);
     const priceStr = car.price ? car.price.toLocaleString() : "N/A";
 
+    // Logic เลือกรูปภาพ
     let imgUrl = "";
     if (car.image_url && car.image_url.trim() !== "") {
       imgUrl = car.image_url;
     } else {
-      imgUrl = `https://tse2.mm.bing.net/th?q=${encodeURIComponent(car.brand + " " + car.model + " 2024 side view")}&w=500&h=300&c=7&rs=1&p=0`;
-    }
+      const imgQuery = `${car.brand} ${car.model} 2024 side view`;
+      imgUrl = `https://tse2.mm.bing.net/th?q=${encodeURIComponent(imgQuery)}&w=500&h=300&c=7&rs=1&p=0`;
+    } 
 
     const card = document.createElement("div");
     card.className = "car-card";
@@ -282,8 +284,8 @@ function displayResults(cars) {
                     <div>🐎 ${car.hp} แรงม้า</div>
                     <div>🚀 0-100: ${car.acc_0_100} วินาที</div>
                 </div>
-                <div style="margin-top:12px; display:flex; justify-content:flex-end; align-items:center; gap:8px;">
-                  ${ userEmail ? `<button class=\"fav-btn\" data-carid=\"${carId}\" aria-label=\"Save to favorites\" style=\"background:transparent;border:none;cursor:pointer;font-size:1.4rem;color:${isFav? '#ffd166':'#94a3b8'}\">${isFav? '★':'☆'}</button>` : '' }
+                <div style="margin-top:12px; display:flex; justify-content:flex-end; align-items:center; gap:4px;">
+                  ${ userEmail ? `<button class=\"fav-btn\" data-carid=\"${carId}\" aria-label=\"Save to favorites\" style=\"background:transparent;border:none;cursor:pointer;font-size:2.5rem;color:${isFav? '#ffd166':'#94a3b8'}\">${isFav? '★':'☆'}</button>` : '' }
                 </div>
             </div>
         `;

@@ -74,7 +74,7 @@ body {
 
 /* Hero Section */
 .hero {
-    padding: 60px 20px 40px;
+    padding: 50px 20px 40px;
     text-align: center;
 }
 
@@ -352,7 +352,7 @@ footer {
 
 @media (max-width: 768px) {
     h1 { font-size: 2.5rem; }
-    .navbar { padding: 15px 20px; flex-direction: column; gap: 15px; }
+    .navbar { padding: 15px 20px; flex-direction: row; gap: 15px; }
     .hero { padding-top: 20px; }
 }
 :root {
@@ -455,7 +455,7 @@ button#searchBtn:hover { transform: scale(1.05); }
 .specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem; color: var(--text-muted); }
 
 /* Oil Page Styles */
-.page-header { text-align: center; margin-bottom: 40px;}
+.page-header { text-align: center; margin-bottom: 40px; }
 .oil-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
 .loading-box { grid-column: 1/-1; text-align: center; font-size: 1.2rem; color: var(--primary); padding: 50px; }
 
@@ -483,7 +483,7 @@ button#searchBtn:hover { transform: scale(1.05); }
 
 /* Mobile */
 @media (max-width: 768px) {
-    .navbar { flex-direction: column; gap: 15px; padding: 15px; }
+    .navbar { flex-direction: row; gap: 15px; padding: 15px; }
     h1 { font-size: 2rem; }
 }
 
@@ -514,6 +514,12 @@ button#searchBtn:hover { transform: scale(1.05); }
     .form-input { padding: 0.65rem 0.9rem; }
     .btn-primary { padding: 0.72rem; }
     .mobile-menu { width: 260px; }
+    
+    .category-box { padding: 20px 15px; margin-bottom: 25px; }
+    .result-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+    
+    .page { padding: 30px 20px; }
+    .card { padding: 20px; }
 }
 
 @media (max-width: 480px) {
@@ -529,6 +535,20 @@ button#searchBtn:hover { transform: scale(1.05); }
     .mobile-menu-nav a { padding: 10px 6px; font-size: 0.95rem; }
     .login-card { padding: 1.25rem; }
     .login-title { font-size: 1.05rem; }
+    
+    .category-box { padding: 15px 10px; border-radius: 16px; margin-bottom: 20px; }
+    .category-header h3 { font-size: 1.25rem; }
+    .category-icon { width: 40px; height: 40px; font-size: 1.2rem; }
+    .result-grid { grid-template-columns: 1fr; gap: 15px; }
+    
+    .page { padding: 20px 15px; }
+    .page h1 { font-size: 1.4rem; }
+    .page h1 .logo-icon { width: 28px; height: 28px; }
+    .form-grid { gap: 15px; margin-top: 20px; }
+    .card { padding: 15px; }
+    .card h3 { font-size: 1.1rem; }
+    .card label { font-size: 15px; padding: 8px 0; }
+    .calc-btn { padding: 12px 20px; font-size: 16px; width: 100%; border-radius: 25px; }
 }
 
 
@@ -819,8 +839,8 @@ tr:hover td {
 .mobile-menu.open { transform: translateX(0); }
 .mobile-menu-overlay.open { opacity: 1; pointer-events: auto; }
 
-.mobile-menu-header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:1rem; }
-.mobile-menu-header .logo { display:flex; align-items:center; gap:0.6rem; font-weight:700; color:var(--text-main); }
+.mobile-menu-header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:1rem; background: rgba(0, 0, 0, 0.05); padding: 12px; border-radius: 8px; border: var(--glass-border); }
+.mobile-menu-header .logo { display:flex; align-items:center; gap:0.6rem; font-weight:700; color:var(--text-main); text-decoration: none; }
 .mobile-menu-nav { display:flex; flex-direction:column; gap:0.5rem; padding-top:6px; }
 .mobile-menu-nav a { color:var(--text-main); text-decoration:none; padding:10px 8px; border-radius:8px; }
 .mobile-menu-nav a:hover { background: rgba(255,255,255,0.03); color:var(--accent); }
@@ -828,11 +848,14 @@ tr:hover td {
 .mobile-menu-close { background: transparent; border: none; color: var(--text-main); cursor: pointer; }
 
 /* Mobile menu button inside navbar */
-.mobile-menu-btn { display: none; background: transparent; border: none; color: var(--text-main); cursor: pointer; }
+.mobile-menu-btn { display: none; background: transparent; border: none; color: var(--text-main); cursor: pointer; padding: 5px; }
+.mobile-menu-btn:hover { color: var(--primary); }
 
 @media (max-width: 880px) {
     .nav-menu { display: none; }
-    .mobile-menu-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; }
+    .nav-right { display: none !important; }
+    .mobile-menu-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; margin-left: auto; z-index: 105; }
+    .navbar { padding: 15px 20px; }
 }
 
 /* ===== Page Layout ===== */
@@ -845,7 +868,8 @@ align-items:center;
 text-align:center;
 padding:40px;
 max-width:800px;
-margin:auto;
+margin: 0 auto;
+width: 100%;
 }
 
 h1{
@@ -858,7 +882,7 @@ margin-bottom:10px;
 .quiz-container{
 max-width:700px;
 margin:auto;
-padding:40px 20px;
+padding: 50px 20px;
 text-align:center;
 }
 
@@ -1023,4 +1047,16 @@ color:white;
     gap: 8px;
     color: var(--text-primary);
     background-color: rgba(14, 21, 36, 0.8);
+}
+/* Responsive Fixes for Quiz Page & Mobile Navbar */
+@media (max-width: 768px) {
+    #quizPage { padding-top: 20px; padding-left: 15px; padding-right: 15px; }
+    #quizPage h1 { font-size: 1.6rem !important; }
+    #quizPage p { font-size: 1rem !important; }
+    .card { padding: 20px !important; }
+    .card h3 { font-size: 1.2rem !important; margin-bottom: 15px !important; line-height: 1.4; }
+    .card label { font-size: 1rem !important; padding: 12px 10px !important; }
+    .mobile-menu-btn { display: inline-flex !important; z-index: 105 !important; margin-left: auto; }
+    .nav-right { display: none !important; }
+    .navbar { padding: 15px 20px !important; }
 }
