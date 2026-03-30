@@ -582,9 +582,14 @@ function renderUserProfile() {
   if (headerUser) {
     if (user) {
       headerUser.innerHTML = `
-        <button onclick="window.location.href='index.html'" style="display:flex; align-items:center; gap:8px; background:var(--primary); color:#fff; border:none; padding:5px 12px; border-radius:20px; font-size:0.85rem;">
-          <div class="user-avatar" style="width:24px; height:24px; font-size:0.8rem;">${(user.name||user.email||'U').charAt(0).toUpperCase()}</div>
-        </button>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button onclick="window.location.href='index.html'" style="background:transparent; border:none; padding:0; cursor:pointer;" aria-label="Profile">
+            <div class="user-avatar" style="width:28px; height:28px; font-size:0.85rem;">${(user.name||user.email||'U').charAt(0).toUpperCase()}</div>
+          </button>
+          <button onclick="logout();return false;" style="background:rgba(255,107,107,0.1); color:#ff6b6b; border: 1px solid rgba(255,107,107,0.3); padding:4px 10px; border-radius:20px; font-size:0.8rem; font-weight:500; cursor:pointer;">
+            Logout
+          </button>
+        </div>
       `;
     } else {
       headerUser.innerHTML = `
