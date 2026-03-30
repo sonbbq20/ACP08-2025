@@ -723,12 +723,12 @@ button#searchBtn:hover { transform: scale(1.05); }
     font-size: 0.9rem; 
     font-weight: 500; 
     display: inline-block;
+    transition: all 0.5s;
 }
 
 .btn-ghost:hover {
     color: var(--accent);
     background: var(--accent-light);
-    transition: all 0.5s;
     transform: translateY(-2px);
 }
 
@@ -743,13 +743,13 @@ button#searchBtn:hover { transform: scale(1.05); }
     font-weight:500; 
     cursor:pointer;
     text-decoration: none;
+    transition: all 0.5s;
 }
 
 .btn-logout:hover {
     background: #ff6b6b;
     color: #0f172a;
     border-color: #000000;
-    transition: all 0.4s;
 }
 
 /* ===== Form Elements ===== */
