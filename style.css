@@ -307,6 +307,18 @@ button#searchBtn:hover {
     text-align: center;
 }
 
+/* Sale badge: orange rectangle above fuel cost */
+.sale-box {
+    background: rgba(255, 165, 0, 0.08);
+    border: 1px solid rgba(255, 165, 0, 0.18);
+    border-radius: 12px;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+    color: #ff8c00;
+    font-weight: 700;
+    text-align: center;
+}
+
 .cost-label {
     font-size: 0.8rem;
     color: var(--text-muted);

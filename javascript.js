@@ -126,10 +126,12 @@ async function loadPopularCars() {
       const allCars = await response.json();
       
       // กรองรถแต่ละประเภท (EV, Hybrid, ICE/Gasoline) เอามาโชว์หมวดละไม่เกิน 3-4 คัน
-      const evCars = allCars.filter(c => c.fuel === 'ev').slice(0, 3);
-      const hybridCars = allCars.filter(c => c.fuel === 'hybrid').slice(0, 3);
+      // sort helper: prefer numeric fields `sale` or `Sale`
+      const sortBySaleDesc = (arr) => (arr || []).sort((a, b) => ((b.sale || b.Sale || 0) - (a.sale || a.Sale || 0)));
+      const evCars = sortBySaleDesc(allCars.filter(c => c.fuel === 'ev')).slice(0, 3);
+      const hybridCars = sortBySaleDesc(allCars.filter(c => c.fuel === 'hybrid')).slice(0, 3);
       // สมมติว่ารถที่เหลือที่ไม่ใช่ ev, hybrid, diesel คือสันดาปเบนซิน
-      const gasolineCars = allCars.filter(c => c.fuel !== 'ev' && c.fuel !== 'hybrid' && c.fuel !== 'diesel').slice(0, 3);
+      const gasolineCars = sortBySaleDesc(allCars.filter(c => c.fuel !== 'ev' && c.fuel !== 'hybrid' && c.fuel !== 'diesel')).slice(0, 3);
 
       displayPopularSection(gasolineCars, "popularGasoline");
       displayPopularSection(hybridCars, "popularHybrid");
@@ -174,6 +176,10 @@ function displayPopularSection(cars, containerId) {
     const costPerKm = (fuelPrice / car.efficiency).toFixed(2);
     const priceStr = car.price ? car.price.toLocaleString() : "N/A";
 
+    // Sale / ยอดขาย (support both `sale` and `Sale` keys)
+    const saleVal = (typeof car.sale !== 'undefined') ? car.Sale : (typeof car.Sale !== 'undefined' ? car.Sale : 0);
+    const saleStr = (saleVal === null || saleVal === undefined || saleVal === '') ? 'N/A' : (typeof saleVal === 'number' ? saleVal.toLocaleString() : saleVal);
+
     // Logic เลือกรูปภาพ
     let imgUrl = "";
     if (car.image_url && car.image_url.trim() !== "") {
@@ -197,9 +203,10 @@ function displayPopularSection(cars, containerId) {
                     <h3>${car.brand} ${car.model}</h3>
                     <span class="car-year" style="font-size:0.8rem;color:#4a9eff;">${car.car_type || "N/A"}</span>
                 </div>
+                <div class="sale-box">ยอดขาย: ${saleStr}</div>
                 <div class="fuel-cost-box">
-                    <span class="cost-label">ต้นทุนเชื้อเพลิง</span>
-                    <span class="cost-value">${costPerKm}</span> <span class="cost-unit">บาท/กม.</span>
+                  <span class="cost-label">ต้นทุนเชื้อเพลิง</span>
+                  <span class="cost-value">${costPerKm}</span> <span class="cost-unit">บาท/กม.</span>
                 </div>
                 <div class="specs-grid" style="grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem;">
                     <div>⛽ ${fuelName}</div>
