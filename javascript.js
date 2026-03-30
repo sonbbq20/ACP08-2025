@@ -203,7 +203,7 @@ function displayPopularSection(cars, containerId) {
                     <h3>${car.brand} ${car.model}</h3>
                     <span class="car-year" style="font-size:0.8rem;color:#4a9eff;">${car.car_type || "N/A"}</span>
                 </div>
-                <div class="sale-box">ยอดขาย: ${saleStr}</div>
+                <div class="sale-box">ยอดขาย: ${saleStr} คัน</div>
                 <div class="fuel-cost-box">
                   <span class="cost-label">ต้นทุนเชื้อเพลิง</span>
                   <span class="cost-value">${costPerKm}</span> <span class="cost-unit">บาท/กม.</span>
