@@ -715,12 +715,41 @@ button#searchBtn:hover { transform: scale(1.05); }
 }
 
 .btn-ghost {
-    color: var(--text-secondary);
+    background-color: var(--primary); 
+    color: white; 
+    padding: 6px 14px; 
+    border-radius: 20px; 
+    text-decoration: none; 
+    font-size: 0.9rem; 
+    font-weight: 500; 
+    display: inline-block;
 }
 
 .btn-ghost:hover {
     color: var(--accent);
     background: var(--accent-light);
+    transition: all 0.5s;
+    transform: translateY(-2px);
+}
+
+
+.btn-logout {
+    background:rgba(255,107,107,0.1); 
+    color:#ff6b6b; 
+    border: 1px solid rgba(255,107,107,0.3); 
+    padding:4px 10px; 
+    border-radius:20px; 
+    font-size:0.8rem; 
+    font-weight:500; 
+    cursor:pointer;
+    text-decoration: none;
+}
+
+.btn-logout:hover {
+    background: #ff6b6b;
+    color: #0f172a;
+    border-color: #000000;
+    transition: all 0.4s;
 }
 
 /* ===== Form Elements ===== */

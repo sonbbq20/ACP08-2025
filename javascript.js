@@ -549,7 +549,7 @@ function renderUserProfile() {
           <div class="user-avatar">${(user.name||user.email||'U').charAt(0).toUpperCase()}</div>
           <span class="user-name">${user.name}</span>
         </button>
-        <a href="#" onclick="logout();return false;" class="btn-ghost">Logout</a>`;
+        <a href="#" onclick="logout();return false;" class="btn-logout">Logout</a>`;
     } else {
       area.innerHTML = `<a href="login.html" class="btn-ghost">Sign in</a>`;
     }
@@ -593,14 +593,14 @@ function renderUserProfile() {
           <button onclick="window.location.href='index.html'" style="background:transparent; border:none; padding:0; cursor:pointer;" aria-label="Profile">
             <div class="user-avatar" style="width:28px; height:28px; font-size:0.85rem;">${(user.name||user.email||'U').charAt(0).toUpperCase()}</div>
           </button>
-          <button onclick="logout();return false;" style="background:rgba(255,107,107,0.1); color:#ff6b6b; border: 1px solid rgba(255,107,107,0.3); padding:4px 10px; border-radius:20px; font-size:0.8rem; font-weight:500; cursor:pointer;">
+          <button onclick="logout();return false;" class="btn-logout">
             Logout
           </button>
         </div>
       `;
     } else {
       headerUser.innerHTML = `
-        <a href="login.html" style="background-color: var(--primary); color: white; padding: 6px 14px; border-radius: 20px; text-decoration: none; font-size: 0.9rem; font-weight: 500; display: inline-block;">
+        <a href="login.html" class="btn-ghost">
         Login
         </a>
       `;
