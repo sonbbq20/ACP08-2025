@@ -248,10 +248,8 @@ function displayRecommendedCars(cars) {
 
     // format
     const costPerKmDisplay = costPerKm.toFixed(2);
-    const yearlyCostDisplay = yearlyCost.toLocaleString();
-    const monthlyCostDisplay = monthlyCost.toLocaleString(undefined, {
-      maximumFractionDigits: 0,
-    });
+    const yearlyCostDisplay = Math.round(yearlyCost).toLocaleString();
+    const monthlyCostDisplay = Math.round(monthlyCost).toLocaleString();
 
     const priceStr = car.price ? car.price.toLocaleString() : "N/A";
 
