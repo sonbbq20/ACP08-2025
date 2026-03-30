@@ -266,14 +266,9 @@ function renderOilPage() {
     { n: "เบนซิน 95", p: oilPrices.gasoline95, c: "#ef4444" },
     { n: "แก๊สโซฮอล์ 91", p: oilPrices.gasohol91, c: "#10b981" },
     { n: "แก๊สโซฮอล์ E20", p: oilPrices.e20, c: "#0ea5e9" },
-    { n: "ดีเซล B7", p: oilPrices.diesel, c: "#484be9" },
+    { n: "ดีเซล B7", p: oilPrices.premium_diesel, c: "#484be9" },
     { n: "แก๊สโซฮอล์ E85", p: oilPrices.e85, c: "#ec4899" },
-    {
-      n: "แก๊สโซฮอล์ 95 Premium",
-      p: oilPrices.premium_gasohol_95,
-      c: "#f43f5e",
-    },
-    { n: "ดีเซล Premium", p: oilPrices.premium_diesel, c: "#8b5cf6" },
+    { n: "ดีเซล Premium", p: oilPrices.diesel, c: "#8b5cf6" },
     { n: "NGV", p: oilPrices.ngv, c: "#7a7a7a" },
     { n: "ไฟฟ้า (EV)", p: oilPrices.electricity, c: "#00d2d3", u: "บาท/หน่วย" },
   ];
