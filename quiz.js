@@ -57,9 +57,15 @@ fetchRecommendedCars(top3, budget);
 function goBack() {
   document.getElementById("resultPage").classList.add("hidden");
   document.getElementById("quizPage").classList.remove("hidden");
-  // Reset max-width when going back
-  document.getElementById("resultPage").style.maxWidth = "800px";
-}
+
+  const radios = document.querySelectorAll("input[type=radio]");
+  radios.forEach(r => r.checked = false);
+
+  document.getElementById("quizResult").innerHTML = "";
+
+  // Smooth scroll
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
 function goMain() {
   document.getElementById("quizPage").classList.add("hidden");
