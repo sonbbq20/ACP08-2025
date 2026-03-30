@@ -235,34 +235,59 @@ function displayRecommendedCars(cars) {
 
     const card = document.createElement("div");
     card.className = "car-card";
+    // Unique id
+    const carId = car.id || `${(car.brand||'').replace(/\s+/g,'_')}_${(car.model||'').replace(/\s+/g,'_')}`;
+    const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    const userEmail = currentUser ? currentUser.email : null;
+    const favs = userEmail ? (typeof getFavoritesForUser === 'function' ? getFavoritesForUser(userEmail) : []) : [];
+    const isFav = favs.includes(carId);
+
     card.innerHTML = `
-            <div class="car-img-wrapper">
-                <img src="${imgUrl}" onerror="this.src='https://placehold.co/600x400?text=${
-      car.brand
-    }'" alt="${car.brand} ${car.model}">
-                <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.8);color:#fff;padding:4px 8px;border-radius:4px;font-size:0.8rem;">
-                    ฿${priceStr}
-                </div>
-            </div>
-            <div class="car-content">
-                <div class="car-title">
-                    <h3>${car.brand} ${car.model}</h3>
-                    <span class="car-year" style="font-size:0.8rem;color:#4a9eff;">${
-                      car.car_type || "N/A"
-                    }</span>
-                </div>
-                <div class="fuel-cost-box">
-                    <span class="cost-label">ต้นทุนเชื้อเพลิง</span>
-                    <span class="cost-value">${costPerKm}</span> <span class="cost-unit">บาท/กม.</span>
-                </div>
-                <div class="specs-grid" style="grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem;">
-                    <div>⛽ ${fuelName}</div>
-                    <div>⚡ ${car.efficiency} กม./${unit}</div>
-                    <div>🐎 ${car.hp} แรงม้า</div>
-                    <div>⏱️ 0-100: ${car.acc_0_100} วินาที</div>
-                </div>
-            </div>
-        `;
+        <div class="car-img-wrapper">
+          <img src="${imgUrl}" onerror="this.src='https://placehold.co/600x400?text=${car.brand}'" alt="${car.brand} ${car.model}">
+          <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.8);color:#fff;padding:4px 8px;border-radius:4px;font-size:0.8rem;">
+            ฿${priceStr}
+          </div>
+        </div>
+        <div class="car-content">
+          <div class="car-title">
+            <h3>${car.brand} ${car.model}</h3>
+            <span class="car-year" style="font-size:0.8rem;color:#4a9eff;">${car.car_type || "N/A"}</span>
+          </div>
+          <div class="fuel-cost-box">
+            <span class="cost-label">ต้นทุนเชื้อเพลิง</span>
+            <span class="cost-value">${costPerKm}</span> <span class="cost-unit">บาท/กม.</span>
+          </div>
+          <div class="specs-grid" style="grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem;">
+            <div>⛽ ${fuelName}</div>
+            <div>⚡ ${car.efficiency} กม./${unit}</div>
+            <div>🐎 ${car.hp} แรงม้า</div>
+            <div>⏱️ 0-100: ${car.acc_0_100} วินาที</div>
+          </div>
+          <div style="margin-top:12px; display:flex; justify-content:flex-end; align-items:center; gap:8px;">
+            ${ userEmail ? `<button class=\"fav-btn\" data-carid=\"${carId}\" aria-label=\"Save to favorites\" style=\"background:transparent;border:none;cursor:pointer;font-size:1.4rem;color:${isFav? '#ffd166':'#94a3b8'}\">${isFav? '★':'☆'}</button>` : '' }
+          </div>
+        </div>
+      `;
+
+    setTimeout(()=>{
+      const btn = card.querySelector('.fav-btn');
+      if(btn){
+      btn.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        if(!userEmail){ alert('กรุณาเข้าสู่ระบบเพื่อบันทึกรายการโปรด'); return; }
+        const id = btn.getAttribute('data-carid');
+        const now = getFavoritesForUser(userEmail);
+        const idx = now.findIndex(x => x.id === id);
+        if(idx===-1){
+          const obj = { id: id, brand: car.brand, model: car.model, price: car.price, efficiency: car.efficiency, fuel: car.fuel, image_url: car.image_url, hp: car.hp, acc_0_100: car.acc_0_100, car_type: car.car_type };
+          now.push(obj);
+          btn.textContent='★'; btn.style.color='#ffd166';
+        } else { now.splice(idx,1); btn.textContent='☆'; btn.style.color='#94a3b8'; }
+        saveFavoritesForUser(userEmail, now);
+      });
+      }
+    },0);
     container.appendChild(card);
   });
 }
