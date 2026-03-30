@@ -549,7 +549,7 @@ function renderUserProfile() {
   }
   if (mobileInfo) {
     if (user) mobileInfo.innerHTML = `Signed in as <strong>${user.name}</strong> • <a href='#' onclick='logout();return false;'>Logout</a>`;
-    else mobileInfo.innerHTML = `<a href='login.html'>Sign in</a>`;
+    else mobileInfo.innerHTML = ``; // Hide redundant sign in below
   } else if (mobileFooter && user) {
     // create mobileUserInfo if missing
     const div = document.createElement('div');
@@ -558,6 +558,41 @@ function renderUserProfile() {
     div.style.color = 'var(--text-secondary)';
     div.innerHTML = `Signed in as <strong>${user.name}</strong> • <a href='#' onclick='logout();return false;'>Logout</a>`;
     mobileFooter.prepend(div);
+  }
+
+  // Dynamically inject mobile header button if missing
+  let headerUser = document.getElementById('mobileHeaderUser');
+  if (!headerUser) {
+    const mobileHeader = document.querySelector('.mobile-menu-header');
+    if (mobileHeader) {
+      headerUser = document.createElement('div');
+      headerUser.id = 'mobileHeaderUser';
+      headerUser.style.marginLeft = 'auto';
+      headerUser.style.marginRight = '15px';
+      
+      const closeBtn = mobileHeader.querySelector('.mobile-menu-close');
+      if (closeBtn) {
+        mobileHeader.insertBefore(headerUser, closeBtn);
+      } else {
+        mobileHeader.appendChild(headerUser);
+      }
+    }
+  }
+
+  if (headerUser) {
+    if (user) {
+      headerUser.innerHTML = `
+        <button onclick="window.location.href='index.html'" style="display:flex; align-items:center; gap:8px; background:var(--primary); color:#fff; border:none; padding:5px 12px; border-radius:20px; font-size:0.85rem;">
+          <div class="user-avatar" style="width:24px; height:24px; font-size:0.8rem;">${(user.name||user.email||'U').charAt(0).toUpperCase()}</div>
+        </button>
+      `;
+    } else {
+      headerUser.innerHTML = `
+        <a href="login.html" style="background-color: var(--primary); color: white; padding: 6px 14px; border-radius: 20px; text-decoration: none; font-size: 0.9rem; font-weight: 500; display: inline-block;">
+          เข้าสู่ระบบ
+        </a>
+      `;
+    }
   }
 }
 
