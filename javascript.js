@@ -18,6 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // 1. เทคนิคสำคัญ: สั่งโชว์ข้อมูลทันที! ไม่ต้องรอ API
   renderOilPage();
 
+  // Load popular cars if on index page
+  if (document.getElementById("popularCarsSection")) {
+    loadPopularCars();
+  }
+
   // 2. แล้วค่อยแอบไปดึงข้อมูลจริงมาอัพเดททีหลัง (Background Update)
   fetchOilPrices();
 
@@ -44,11 +49,17 @@ function quickSearch(term) {
 async function searchCar() {
   const input = document.getElementById("searchInput").value.trim();
   const resultDiv = document.getElementById("result");
+  const popularSection = document.getElementById("popularCarsSection");
+  const searchTitle = document.getElementById("searchResultsTitle");
 
   if (!input) {
     alert("กรุณาพิมพ์ชื่อรถ");
     return;
   }
+
+  // Hide popular cars and show search heading
+  if (popularSection) popularSection.style.display = "none";
+  if (searchTitle) searchTitle.style.display = "block";
 
   resultDiv.innerHTML =
     '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #4a9eff;">🔄 กำลังค้นหาข้อมูลจาก Supabase...</div>';
@@ -91,6 +102,113 @@ async function searchCar() {
     console.error("Error:", error);
     resultDiv.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ff6b6b;">⚠️ ไม่สามารถเชื่อมต่อฐานข้อมูลได้</div>`;
   }
+}
+
+async function loadPopularCars() {
+  const SUPABASE_URL = "https://fyaqsdqvircjanlasxov.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5YXFzZHF2aXJjamFubGFzeG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjUwMzcsImV4cCI6MjA4ODk0MTAzN30.pO9fF_ouzuOj5CbYhPZmCXMoVZFohFsk9cWj4Ur4dtQ";
+
+  // ดึงข้อมูลรถที่ยอดนิยม 
+  // แนะนำใช้รุ่นที่ระบุเจาะจงหรือสุ่มมาในหมวดต่างๆ
+  // เช่น Honda, Toyota จะเป็นสันดาป, BYD เป็น EV, etc.
+  
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/cars?select=*`, {
+      method: "GET",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.ok) {
+      const allCars = await response.json();
+      
+      // กรองรถแต่ละประเภท (EV, Hybrid, ICE/Gasoline) เอามาโชว์หมวดละไม่เกิน 3-4 คัน
+      const evCars = allCars.filter(c => c.fuel === 'ev').slice(0, 3);
+      const hybridCars = allCars.filter(c => c.fuel === 'hybrid').slice(0, 3);
+      // สมมติว่ารถที่เหลือที่ไม่ใช่ ev, hybrid, diesel คือสันดาปเบนซิน
+      const gasolineCars = allCars.filter(c => c.fuel !== 'ev' && c.fuel !== 'hybrid' && c.fuel !== 'diesel').slice(0, 3);
+
+      displayPopularSection(gasolineCars, "popularGasoline");
+      displayPopularSection(hybridCars, "popularHybrid");
+      displayPopularSection(evCars, "popularEV");
+    }
+  } catch (error) {
+    console.error("Error loading popular cars:", error);
+  }
+}
+
+function displayPopularSection(cars, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = "";
+
+  if (!cars || cars.length === 0) {
+    container.innerHTML = `<div style="padding: 20px; color: #94a3b8;">ยังไม่มีข้อมูลในหมวดหมู่นี้</div>`;
+    return;
+  }
+
+  cars.forEach(car => {
+    // ใช้ logic เหมือน displayResults
+    let fuelPrice = oilPrices.gasohol95;
+    let fuelName = "เบนซิน";
+    let unit = "ลิตร";
+
+    if (car.fuel === "ev") {
+      fuelPrice = oilPrices.electricity;
+      fuelName = "ไฟฟ้า (EV)";
+      unit = "kWh";
+    } else if (car.fuel === "diesel") {
+      fuelPrice = oilPrices.diesel;
+      fuelName = "ดีเซล";
+    } else if (car.fuel === "hybrid") {
+      fuelName = "ไฮบริด";
+      fuelPrice = oilPrices.gasohol95;
+    } else if (car.fuel === "gas91") {
+      fuelName = "แก๊สโซฮอล์ 91";
+      fuelPrice = oilPrices.gasohol91;
+    }
+
+    const costPerKm = (fuelPrice / car.efficiency).toFixed(2);
+    const priceStr = car.price ? car.price.toLocaleString() : "N/A";
+
+    let imgUrl = "";
+    if (car.image_url && car.image_url.trim() !== "") {
+      imgUrl = car.image_url;
+    } else {
+      imgUrl = `https://tse2.mm.bing.net/th?q=${encodeURIComponent(car.brand + " " + car.model + " 2024 side view")}&w=500&h=300&c=7&rs=1&p=0`;
+    }
+
+    const card = document.createElement("div");
+    card.className = "car-card";
+    card.innerHTML = `
+            <div class="car-img-wrapper">
+                <img src="${imgUrl}" onerror="this.src='https://placehold.co/600x400?text=${car.brand}'">
+                <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.8);color:#fff;padding:4px 8px;border-radius:4px;font-size:0.8rem;">
+                    ฿${priceStr}
+                </div>
+            </div>
+            <div class="car-content">
+                <div class="car-title">
+                    <h3>${car.brand} ${car.model}</h3>
+                    <span class="car-year" style="font-size:0.8rem;color:#4a9eff;">${car.car_type || "N/A"}</span>
+                </div>
+                <div class="fuel-cost-box">
+                    <span class="cost-label">ต้นทุนเชื้อเพลิง</span>
+                    <span class="cost-value">${costPerKm}</span> <span class="cost-unit">บาท/กม.</span>
+                </div>
+                <div class="specs-grid" style="grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem;">
+                    <div>⛽ ${fuelName}</div>
+                    <div>⚡ ${car.efficiency} กม./${unit}</div>
+                    <div>🐎 ${car.hp || '-'} แรงม้า</div>
+                    <div>🚀 0-100: ${car.acc_0_100 || '-'} วิ</div>
+                </div>
+            </div>
+        `;
+    container.appendChild(card);
+  });
 }
 
 function displayResults(cars) {
