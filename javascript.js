@@ -566,3 +566,47 @@ function logout() {
   renderUserProfile();
   window.location.href = 'login.html';
 }
+
+ document.addEventListener('DOMContentLoaded', ()=>{
+      renderUserProfile();
+      const user = getCurrentUser();
+      const container = document.getElementById('favoritesContainer');
+      container.innerHTML = '';
+      if(!user){
+        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#fff;padding:30px;">กรุณาเข้าสู่ระบบเพื่อดูรายการโปรด</div>';
+        return;
+      }
+      const favs = getFavoritesForUser(user.email) || [];
+      if(favs.length===0){
+        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#fff;padding:30px;">ยังไม่มีรายการโปรด</div>';
+        return;
+      }
+      favs.forEach(car=>{
+        // normalize image URL: accept only non-empty, non-'null', non-'undefined' strings
+        let img = '';
+        if (car.image_url && typeof car.image_url === 'string') {
+          const s = car.image_url.trim();
+          if (s !== '' && s.toLowerCase() !== 'null' && s.toLowerCase() !== 'undefined') img = s;
+        }
+        if (!img) {
+          const imgQuery = `${car.brand} ${car.model} 2024 side view`;
+          img = `https://tse2.mm.bing.net/th?q=${encodeURIComponent(imgQuery)}&w=500&h=300&c=7&rs=1&p=0`;
+        }
+        const priceStr = car.price? car.price.toLocaleString():'N/A';
+        const costPerKm = ( (car.fuel==='ev'? (oilPrices.electricity||4.5) : (oilPrices.gasohol95||30.85) ) / (car.efficiency||1) ).toFixed(2);
+        const card = document.createElement('div'); card.className='car-card';
+        card.innerHTML = `
+          <div class="car-img-wrapper"><img src="${img}" onerror="this.src='https://placehold.co/600x400?text=${car.brand}'"><div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.8);color:#fff;padding:4px 8px;border-radius:4px;font-size:0.8rem;">฿${priceStr}</div></div>
+          <div class="car-content"><div class="car-title"><h3>${car.brand} ${car.model}</h3><span class="car-year" style="font-size:0.8rem;color:#4a9eff;">${car.car_type||'N/A'}</span></div>
+          <div class="fuel-cost-box"><span class="cost-label">ต้นทุนเชื้อเพลิง</span><span class="cost-value">${costPerKm}</span> <span class="cost-unit">บาท/กม.</span></div>
+          <div style="display:flex;justify-content:flex-end;margin-top:12px;"><button class="fav-remove" data-carid="${car.id}" style="background:#ff6b6b;border:none;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer;">ลบจากรายการโปรด</button></div></div>
+        `;
+        container.appendChild(card);
+        card.querySelector('.fav-remove').addEventListener('click', ()=>{
+          const now = getFavoritesForUser(user.email);
+          const idx = now.findIndex(x=>x.id===car.id);
+          if(idx!==-1){ now.splice(idx,1); saveFavoritesForUser(user.email, now); card.remove(); }
+          if(container.children.length===0) container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#fff;padding:30px;">ยังไม่มีรายการโปรด</div>';
+        });
+      });
+    });
