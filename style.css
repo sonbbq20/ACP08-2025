@@ -794,7 +794,8 @@ tr:hover td {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.25s ease;
-    z-index: 90;
+    /* Must sit above the navbar (navbar z-index:100) */
+    z-index: 110;
 }
 
 .mobile-menu {
@@ -808,7 +809,8 @@ tr:hover td {
     border-right: var(--glass-border);
     transform: translateX(-110%);
     transition: transform 0.28s ease;
-    z-index: 95;
+    /* Above navbar and overlay so it is fully interactable */
+    z-index: 115;
     display: flex;
     flex-direction: column;
     padding: 1rem;

@@ -215,6 +215,9 @@ function displayResults(cars) {
   const resultDiv = document.getElementById("result");
   resultDiv.innerHTML = "";
 
+  const currentUser = getCurrentUser();
+  const userEmail = currentUser ? currentUser.email : null;
+
   cars.forEach((car) => {
     let fuelPrice = oilPrices.gasohol95;
     let fuelName = "เบนซิน";
@@ -237,8 +240,7 @@ function displayResults(cars) {
 
     // คำนวณความคุ้มค่า
     const costPerKm = (fuelPrice / car.efficiency).toFixed(2);
-    const maxRange = (car.tank_size * car.efficiency).toFixed(0);
-    const priceStr = car.price.toLocaleString();
+    const priceStr = car.price ? car.price.toLocaleString() : "N/A";
 
     // Logic เลือกรูปภาพ
     let imgUrl = "";
@@ -248,6 +250,13 @@ function displayResults(cars) {
       const imgQuery = `${car.brand} ${car.model} 2024 side view`;
       imgUrl = `https://tse2.mm.bing.net/th?q=${encodeURIComponent(imgQuery)}&w=500&h=300&c=7&rs=1&p=0`;
     }
+
+    // Unique id for storing favorites
+    const carId = car.id || `${(car.brand||'').replace(/\s+/g,'_')}_${(car.model||'').replace(/\s+/g,'_')}`;
+
+    // Check favorite (favorites stored as array of objects {id, brand, model, ...})
+    const favs = userEmail ? getFavoritesForUser(userEmail) : [];
+    const isFav = favs.some(f => f.id === carId);
 
     const card = document.createElement("div");
     card.className = "car-card";
@@ -273,11 +282,44 @@ function displayResults(cars) {
                     <div>🐎 ${car.hp} แรงม้า</div>
                     <div>🚀 0-100: ${car.acc_0_100} วินาที</div>
                 </div>
+                <div style="margin-top:12px; display:flex; justify-content:flex-end; align-items:center; gap:8px;">
+                  ${ userEmail ? `<button class=\"fav-btn\" data-carid=\"${carId}\" aria-label=\"Save to favorites\" style=\"background:transparent;border:none;cursor:pointer;font-size:1.4rem;color:${isFav? '#ffd166':'#94a3b8'}\">${isFav? '★':'☆'}</button>` : '' }
+                </div>
             </div>
         `;
+
+    // favorite click handler
+    setTimeout(() => {
+      const btn = card.querySelector('.fav-btn');
+      if (btn) {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!userEmail) { alert('กรุณาเข้าสู่ระบบเพื่อบันทึกรายการโปรด'); return; }
+          const id = btn.getAttribute('data-carid');
+          const now = getFavoritesForUser(userEmail);
+          const idx = now.findIndex(x => x.id === id);
+          if (idx === -1) {
+            // save minimal car object
+            const obj = { id: id, brand: car.brand, model: car.model, price: car.price, efficiency: car.efficiency, fuel: car.fuel, image_url: car.image_url, hp: car.hp, acc_0_100: car.acc_0_100, car_type: car.car_type };
+            now.push(obj);
+            btn.textContent='★'; btn.style.color='#ffd166';
+          } else {
+            now.splice(idx,1);
+            btn.textContent='☆'; btn.style.color='#94a3b8';
+          }
+          saveFavoritesForUser(userEmail, now);
+        });
+      }
+    },0);
+
     resultDiv.appendChild(card);
   });
 }
+
+// Favorites helpers (persisted per user)
+function getFavoritesKey(email){ return `cw_favs_${email}`; }
+function getFavoritesForUser(email){ try{ const r=localStorage.getItem(getFavoritesKey(email)); return r?JSON.parse(r):[] }catch(e){return[]} }
+function saveFavoritesForUser(email,favs){ try{ localStorage.setItem(getFavoritesKey(email), JSON.stringify(favs)); }catch(e){console.error(e);} }
 
 // ==========================================
 // 3. ระบบดึงราคาน้ำมัน
