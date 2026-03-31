@@ -73,10 +73,6 @@ function goMain() {
 }
 
 async function fetchRecommendedCars(topTraits, budget = 99999999) {
-  const SUPABASE_URL = "https://fyaqsdqvircjanlasxov.supabase.co";
-  const SUPABASE_KEY =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5YXFzZHF2aXJjamFubGFzeG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjUwMzcsImV4cCI6MjA4ODk0MTAzN30.pO9fF_ouzuOj5CbYhPZmCXMoVZFohFsk9cWj4Ur4dtQ";
-
   // Build a query based on the top 2 traits
   const trait1 = topTraits[0][0];
   const trait2 = topTraits.length > 1 ? topTraits[1][0] : null;
