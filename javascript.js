@@ -520,7 +520,6 @@ function closeMobileMenu() {
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMobileMenu(); });
 
 function renderUserProfile() {
-<<<<<<< HEAD
     const user = globalUser;
     const area = document.getElementById('userArea');
     const mobileFooter = document.querySelector('.mobile-menu-footer');
@@ -536,106 +535,6 @@ function renderUserProfile() {
                 <a href="#" onclick="logout();return false;" class="btn-logout">Logout</a>`;
         } else {
             area.innerHTML = `<a href="login.html" class="btn-ghost">Login</a>`;
-=======
-  const user = getCurrentUser();
-  const area = document.getElementById('userArea');
-  const mobileFooter = document.querySelector('.mobile-menu-footer');
-  const mobileInfo = document.getElementById('mobileUserInfo');
-  if (area) {
-    if (user) {
-      area.innerHTML = `
-        <button class="user-btn" onclick="window.location.href='index.html'">
-          <div class="user-avatar">${(user.name||user.email||'U').charAt(0).toUpperCase()}</div>
-          <span class="user-name">${user.name}</span>
-        </button>
-        <a href="#" onclick="logout();return false;" class="btn-logout">Logout</a>`;
-    } else {
-      area.innerHTML = `<a href="login.html" class="btn-ghost">Sign in</a>`;
-    }
-  }
-  if (mobileInfo) {
-    if (user) mobileInfo.innerHTML = `Signed in as <strong>${user.name}</strong> • <a href='#' onclick='logout();return false;'>Logout</a>`;
-    else mobileInfo.innerHTML = ``; // Hide redundant sign in below
-  } else if (mobileFooter && user) {
-    // create mobileUserInfo if missing
-    const div = document.createElement('div');
-    div.id = 'mobileUserInfo';
-    div.style.fontSize = '0.95rem';
-    div.style.color = 'var(--text-secondary)';
-    div.innerHTML = `Signed in as <strong>${user.name}</strong> • <a href='#' onclick='logout();return false;'>Logout</a>`;
-    mobileFooter.prepend(div);
-  }
-
-  // Dynamically inject mobile header button if missing
-  let headerUser = document.getElementById('mobileHeaderUser');
-  if (!headerUser) {
-    const mobileHeader = document.querySelector('.mobile-menu-header');
-    if (mobileHeader) {
-      headerUser = document.createElement('div');
-      headerUser.id = 'mobileHeaderUser';
-      headerUser.style.marginLeft = 'auto';
-      headerUser.style.marginRight = '15px';
-      
-      const closeBtn = mobileHeader.querySelector('.mobile-menu-close');
-      if (closeBtn) {
-        mobileHeader.insertBefore(headerUser, closeBtn);
-      } else {
-        mobileHeader.appendChild(headerUser);
-      }
-    }
-  }
-
-  if (headerUser) {
-    if (user) {
-      headerUser.innerHTML = `
-        <div style="display:flex; align-items:center; gap:8px;">
-          <button onclick="window.location.href='index.html'" style="background:transparent; border:none; padding:0; cursor:pointer;" aria-label="Profile">
-            <div class="user-avatar" style="width:28px; height:28px; font-size:0.85rem;">${(user.name||user.email||'U').charAt(0).toUpperCase()}</div>
-          </button>
-          <button onclick="logout();return false;" class="btn-logout">
-            Logout
-          </button>
-        </div>
-      `;
-    } else {
-      headerUser.innerHTML = `
-        <a href="login.html" class="btn-ghost">
-        Login
-        </a>
-      `;
-    }
-  }
-}
-
-function logout() {
-  localStorage.removeItem('cw_currentUser');
-  localStorage.removeItem('cw_remember');
-  closeMobileMenu();
-  renderUserProfile();
-  window.location.href = 'login.html';
-}
-
-    document.addEventListener('DOMContentLoaded', ()=>{
-      renderUserProfile();
-      const user = getCurrentUser();
-      const container = document.getElementById('favoritesContainer');
-      container.innerHTML = '';
-      if(!user){
-        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#fff;padding:30px;">กรุณาเข้าสู่ระบบเพื่อดูรายการโปรด</div>';
-        return;
-      }
-      const favs = getFavoritesForUser(user.email) || [];
-      if(favs.length===0){
-        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#fff;padding:30px;">ยังไม่มีรายการโปรด</div>';
-        return;
-      }
-      favs.forEach(car=>{
-        // pick image (prefer valid image_url)
-        let img = '';
-        if (car.image_url && typeof car.image_url === 'string') {
-          const s = car.image_url.trim();
-          if (s !== '' && s.toLowerCase() !== 'null' && s.toLowerCase() !== 'undefined') img = s;
->>>>>>> 76bb119d1a3dab2db2a3adb304e8a8f9cedb3ae6
         }
     }
     
@@ -663,7 +562,6 @@ function logout() {
             if (closeBtn) mobileHeader.insertBefore(headerUser, closeBtn);
             else mobileHeader.appendChild(headerUser);
         }
-<<<<<<< HEAD
     }
 
     if (headerUser) {
@@ -680,53 +578,3 @@ function logout() {
         }
     }
 }
-=======
-
-        // Determine fuel price, name and unit similar to index display
-        let fuelPrice = oilPrices.gasohol95;
-        let fuelName = 'เบนซิน';
-        let unit = 'ลิตร';
-        if (car.fuel === 'ev') { fuelPrice = oilPrices.electricity; fuelName = 'ไฟฟ้า (EV)'; unit = 'kWh'; }
-        else if (car.fuel === 'diesel') { fuelPrice = oilPrices.diesel; fuelName = 'ดีเซล'; }
-        else if (car.fuel === 'hybrid') { fuelName = 'ไฮบริด'; fuelPrice = oilPrices.gasohol95; }
-        else if (car.fuel === 'gas91') { fuelName = 'แก๊สโซฮอล์ 91'; fuelPrice = oilPrices.gasohol91; }
-
-        const costPerKm = (fuelPrice / (car.efficiency || 1)).toFixed(2);
-        const priceStr = car.price ? car.price.toLocaleString() : 'N/A';
-
-        const card = document.createElement('div'); card.className='car-card';
-        card.innerHTML = `
-          <div class="car-img-wrapper">
-            <img src="${img}" onerror="this.src='https://placehold.co/600x400?text=${car.brand}'">
-            <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.8);color:#fff;padding:4px 8px;border-radius:4px;font-size:0.8rem;">฿${priceStr}</div>
-          </div>
-          <div class="car-content">
-            <div class="car-title">
-              <h3>${car.brand} ${car.model}</h3>
-              <span class="car-year" style="font-size:0.8rem;color:#4a9eff;">${car.car_type||'N/A'}</span>
-            </div>
-            <div class="fuel-cost-box"><span class="cost-label">ต้นทุนเชื้อเพลิง</span><span class="cost-value">${costPerKm}</span> <span class="cost-unit">บาท/กม.</span></div>
-            <div class="specs-grid" style="grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem;">
-              <div>⛽ ${fuelName}</div>
-              <div>⚡ ${car.efficiency || '-'} กม./${unit}</div>
-              <div>🐎 ${car.hp || '-' } แรงม้า</div>
-              <div>🚀 0-100: ${car.acc_0_100 || '-'} วินาที</div>
-            </div>
-            <div style="margin-top:12px; display:flex; justify-content:flex-end; align-items:center; gap:8px;">
-              <button class="fav-remove" data-carid="${car.id}" style="background:#ff6b6b;border:none;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer;">ลบจากรายการโปรด</button>
-            </div>
-          </div>
-        `;
-
-        container.appendChild(card);
-
-        // remove handler
-        card.querySelector('.fav-remove').addEventListener('click', ()=>{
-          const now = getFavoritesForUser(user.email);
-          const idx = now.findIndex(x=>x.id===car.id);
-          if(idx!==-1){ now.splice(idx,1); saveFavoritesForUser(user.email, now); card.remove(); }
-          if(container.children.length===0) container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#fff;padding:30px;">ยังไม่มีรายการโปรด</div>';
-        });
-      });
-    });
->>>>>>> 76bb119d1a3dab2db2a3adb304e8a8f9cedb3ae6
