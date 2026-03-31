@@ -84,14 +84,14 @@ async function fetchRecommendedCars(topTraits, budget = 99999999) {
   const getQueryPart = (t) => {
     switch (t) {
       case "eco": return { q: "fuel=in.(ev,hybrid,phev)", type: "fuel" };
-      case "performance": return { q: "hp=gt.240", type: "perf" };
+      case "performance": return { q: "hp=gt.200", type: "perf" };
       // Safety: Price > 2M and specific safe brands or generally just brands
-      case "safety": return { q: "brand=in.(Volvo,Mercedes-Benz,BMW,Audi)", type: "brand" };
-      case "comfort": return { q: "car_type=in.(Sedan,SUV)", type: "body" };
+      case "safety": return { q: "brand=in.(Volvo,Mercedes-Benz,BMW,Audi,Tesla)", type: "brand" };
+      case "comfort": return { q: "car_type=in.(Sedan,SUV,MPV)", type: "body" };
       case "technology": return { q: "fuel=eq.ev", type: "fuel" };
-      case "family": return { q: "car_type=in.(SUV,MPV,PPV)", type: "body" };
-      case "suv": return { q: "car_type=in.(SUV,PPV)", type: "body" };
-      case "city": return { q: "car_type=in.(Hatchback,Eco Car,Sedan)", type: "body" };
+      case "family": return { q: "car_type=in.(SUV,MPV,Van)", type: "body" };
+      case "suv": return { q: "car_type=in.(SUV,Crossover)", type: "body" };
+      case "city": return { q: "car_type=in.(Hatchback,Sedan)", type: "body" };
       default: return null;
     }
   };
@@ -107,24 +107,21 @@ async function fetchRecommendedCars(topTraits, budget = 99999999) {
   if (p1) queryParts.push(p1.q);
   
   // Combine logic:
-  // If types are different, we can usually combine (e.g. Body + Fuel).
-  // If types are same, we usually skip p2 to avoid over-constraint or conflict, 
-  // UNLESS it logic specific (like 2 attr). But here specific types (body, fuel) conflict if same.
   if (p2 && p1 && p1.type !== p2.type) {
      queryParts.push(p2.q);
   }
 
   // Fallback
-  if (queryParts.length === 0) queryParts.push("limit=4");
+  if (queryParts.length === 0) queryParts.push("limit=30");
 
   // Add ordering
   if(trait1 === 'performance') queryParts.push("order=hp.desc");
   else if(trait1 === 'eco') queryParts.push("order=efficiency.desc");
   else if(trait1 === 'price') queryParts.push("order=price.asc");
-  else queryParts.push("order=price.desc"); // Default sort by price descending to show best cars in budget
+  // ถอด default sort เป็น descending ออก เพื่อให้ได้ความหลากหลายมากขึ้น
   
-  // Always limit
-  if(!queryParts.some(p => p.includes("limit"))) queryParts.push("limit=4");
+  // ให้จำกัดดึงมาเยอะขึ้น เพื่อนำมาสุ่มเลือก
+  if(!queryParts.some(p => p.includes("limit"))) queryParts.push("limit=30");
 
   const finalQuery = queryParts.join("&");
   console.log("Query:", finalQuery);
@@ -164,20 +161,25 @@ async function fetchRecommendedCars(topTraits, budget = 99999999) {
 
     if (!response.ok) throw new Error("Network response was not ok");
 
-    const cars = await response.json();
+    let cars = await response.json();
 
     if (cars.length === 0) {
-      const fallbackUrl = `${SUPABASE_URL}/rest/v1/cars?select=*&limit=4`;
+      const fallbackUrl = `${SUPABASE_URL}/rest/v1/cars?select=*&limit=30`;
       const fallbackRes = await fetch(fallbackUrl, {
         headers: {
           apikey: SUPABASE_KEY,
           Authorization: `Bearer ${SUPABASE_KEY}`,
         },
       });
-      const fallbackCars = await fallbackRes.json();
-      displayRecommendedCars(fallbackCars);
+      let fallbackCars = await fallbackRes.json();
+      
+      // Shuffle fallback cars
+      fallbackCars = fallbackCars.sort(() => 0.5 - Math.random());
+      displayRecommendedCars(fallbackCars.slice(0, 4));
     } else {
-      displayRecommendedCars(cars);
+      // Shuffle the results to avoid showing the exact same cars
+      cars = cars.sort(() => 0.5 - Math.random());
+      displayRecommendedCars(cars.slice(0, 4));
     }
   } catch (err) {
     console.error(err);
@@ -341,7 +343,7 @@ function displayRecommendedCars(cars) {
             userEmail
               ? `<button class="fav-btn" data-carid="${carId}"
                  style="background:none;border:none;cursor:pointer;
-                 font-size:1.4rem;color:${isFav ? "#ffd166" : "#94a3b8"}">
+                 font-size:2.5rem;color:${isFav ? "#ffd166" : "#94a3b8"}">
                  ${isFav ? "★" : "☆"}
                </button>`
               : ""
