@@ -618,7 +618,7 @@ function logout() {
   window.location.href = 'login.html';
 }
 
- document.addEventListener('DOMContentLoaded', ()=>{
+    document.addEventListener('DOMContentLoaded', ()=>{
       renderUserProfile();
       const user = getCurrentUser();
       const container = document.getElementById('favoritesContainer');
@@ -633,7 +633,7 @@ function logout() {
         return;
       }
       favs.forEach(car=>{
-        // normalize image URL: accept only non-empty, non-'null', non-'undefined' strings
+        // pick image (prefer valid image_url)
         let img = '';
         if (car.image_url && typeof car.image_url === 'string') {
           const s = car.image_url.trim();
@@ -643,16 +643,46 @@ function logout() {
           const imgQuery = `${car.brand} ${car.model} 2024 side view`;
           img = `https://tse2.mm.bing.net/th?q=${encodeURIComponent(imgQuery)}&w=500&h=300&c=7&rs=1&p=0`;
         }
-        const priceStr = car.price? car.price.toLocaleString():'N/A';
-        const costPerKm = ( (car.fuel==='ev'? (oilPrices.electricity||4.5) : (oilPrices.gasohol95||30.85) ) / (car.efficiency||1) ).toFixed(2);
+
+        // Determine fuel price, name and unit similar to index display
+        let fuelPrice = oilPrices.gasohol95;
+        let fuelName = 'เบนซิน';
+        let unit = 'ลิตร';
+        if (car.fuel === 'ev') { fuelPrice = oilPrices.electricity; fuelName = 'ไฟฟ้า (EV)'; unit = 'kWh'; }
+        else if (car.fuel === 'diesel') { fuelPrice = oilPrices.diesel; fuelName = 'ดีเซล'; }
+        else if (car.fuel === 'hybrid') { fuelName = 'ไฮบริด'; fuelPrice = oilPrices.gasohol95; }
+        else if (car.fuel === 'gas91') { fuelName = 'แก๊สโซฮอล์ 91'; fuelPrice = oilPrices.gasohol91; }
+
+        const costPerKm = (fuelPrice / (car.efficiency || 1)).toFixed(2);
+        const priceStr = car.price ? car.price.toLocaleString() : 'N/A';
+
         const card = document.createElement('div'); card.className='car-card';
         card.innerHTML = `
-          <div class="car-img-wrapper"><img src="${img}" onerror="this.src='https://placehold.co/600x400?text=${car.brand}'"><div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.8);color:#fff;padding:4px 8px;border-radius:4px;font-size:0.8rem;">฿${priceStr}</div></div>
-          <div class="car-content"><div class="car-title"><h3>${car.brand} ${car.model}</h3><span class="car-year" style="font-size:0.8rem;color:#4a9eff;">${car.car_type||'N/A'}</span></div>
-          <div class="fuel-cost-box"><span class="cost-label">ต้นทุนเชื้อเพลิง</span><span class="cost-value">${costPerKm}</span> <span class="cost-unit">บาท/กม.</span></div>
-          <div style="display:flex;justify-content:flex-end;margin-top:12px;"><button class="fav-remove" data-carid="${car.id}" style="background:#ff6b6b;border:none;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer;">ลบจากรายการโปรด</button></div></div>
+          <div class="car-img-wrapper">
+            <img src="${img}" onerror="this.src='https://placehold.co/600x400?text=${car.brand}'">
+            <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.8);color:#fff;padding:4px 8px;border-radius:4px;font-size:0.8rem;">฿${priceStr}</div>
+          </div>
+          <div class="car-content">
+            <div class="car-title">
+              <h3>${car.brand} ${car.model}</h3>
+              <span class="car-year" style="font-size:0.8rem;color:#4a9eff;">${car.car_type||'N/A'}</span>
+            </div>
+            <div class="fuel-cost-box"><span class="cost-label">ต้นทุนเชื้อเพลิง</span><span class="cost-value">${costPerKm}</span> <span class="cost-unit">บาท/กม.</span></div>
+            <div class="specs-grid" style="grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem;">
+              <div>⛽ ${fuelName}</div>
+              <div>⚡ ${car.efficiency || '-'} กม./${unit}</div>
+              <div>🐎 ${car.hp || '-' } แรงม้า</div>
+              <div>🚀 0-100: ${car.acc_0_100 || '-'} วินาที</div>
+            </div>
+            <div style="margin-top:12px; display:flex; justify-content:flex-end; align-items:center; gap:8px;">
+              <button class="fav-remove" data-carid="${car.id}" style="background:#ff6b6b;border:none;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer;">ลบจากรายการโปรด</button>
+            </div>
+          </div>
         `;
+
         container.appendChild(card);
+
+        // remove handler
         card.querySelector('.fav-remove').addEventListener('click', ()=>{
           const now = getFavoritesForUser(user.email);
           const idx = now.findIndex(x=>x.id===car.id);
