@@ -1102,3 +1102,10 @@ color:white;
     .nav-right { display: none !important; }
     .navbar { padding: 15px 20px !important; }
 }
+
+.popular-icon {
+    width: 40px;
+    height: 40px;
+    display: inline-block;
+    position: relative;
+}
