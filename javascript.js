@@ -131,11 +131,13 @@ async function loadPopularCars() {
       const evCars = sortBySaleDesc(allCars.filter(c => c.fuel === 'ev')).slice(0, 3);
       const hybridCars = sortBySaleDesc(allCars.filter(c => c.fuel === 'hybrid')).slice(0, 3);
       // สมมติว่ารถที่เหลือที่ไม่ใช่ ev, hybrid, diesel คือสันดาปเบนซิน
-      const gasolineCars = sortBySaleDesc(allCars.filter(c => c.fuel !== 'ev' && c.fuel !== 'hybrid' && c.fuel !== 'diesel')).slice(0, 3);
+      const gasolineCars = sortBySaleDesc(allCars.filter(c => c.fuel !== 'ev' && c.fuel !== 'hybrid' && c.fuel !== 'diesel' && c.car_type !== 'Pickup')).slice(0, 3);
+      const pickupCars = sortBySaleDesc(allCars.filter(c => c.car_type && c.car_type.toLowerCase().includes('pickup'))).slice(0, 3);
 
       displayPopularSection(gasolineCars, "popularGasoline");
       displayPopularSection(hybridCars, "popularHybrid");
       displayPopularSection(evCars, "popularEV");
+      displayPopularSection(pickupCars, "popularPickup");
     }
   } catch (error) {
     console.error("Error loading popular cars:", error);
