@@ -467,6 +467,7 @@ async function fetchOilPrices() {
       if (ptt.diesel_b7) oilPrices.diesel = p(ptt.diesel_b7);
       if (ptt.gasohol_e85) oilPrices.e85 = p(ptt.gasohol_e85);
       if (ptt.premium_diesel) oilPrices.premium_diesel = p(ptt.premium_diesel);
+      if (ptt.ngv) oilPrices.ngv = p(ptt.ngv);
       if (ptt.electricity) oilPrices.electricity = p(ptt.electricity);
       
       renderOilPage();
@@ -491,6 +492,7 @@ function renderOilPage() {
     { n: "ดีเซล B7", p: oilPrices.premium_diesel, c: "#484be9" },
     { n: "แก๊สโซฮอล์ E85", p: oilPrices.e85, c: "#ec4899" },
     { n: "ดีเซล Premium", p: oilPrices.diesel, c: "#8b5cf6" },
+    { n: "NGV", p: oilPrices.ngv, c: "#22c55e" },
     { n: "ไฟฟ้า (EV)", p: oilPrices.electricity, c: "#00d2d3", u: "บาท/หน่วย" },
   ];
   oils.forEach((o) => {
