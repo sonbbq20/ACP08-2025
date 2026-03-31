@@ -285,7 +285,9 @@ function displayRecommendedCars(cars) {
         : []
       : [];
 
-    const isFav = favs.includes(carId);
+    // Normalize favorites to an array of ids for checking
+    const favIds = (favs || []).map((f) => (typeof f === "string" ? f : f && f.id ? f.id : null)).filter(Boolean);
+    const isFav = favIds.includes(carId);
 
     // ==========================
     // 🎨 UI
@@ -363,12 +365,18 @@ function displayRecommendedCars(cars) {
           }
 
           const id = btn.getAttribute("data-carid");
-          const now = getFavoritesForUser(userEmail);
+          let now = getFavoritesForUser(userEmail) || [];
 
-          const idx = now.findIndex((x) => x.id === id);
+          // find index supporting both string ids and object entries
+          const idx = now.findIndex((x) => {
+            if (!x) return false;
+            if (typeof x === "string") return x === id;
+            return x.id === id;
+          });
 
           if (idx === -1) {
-            now.push({ id, ...car });
+            // add object (keep shape consistent with other pages)
+            now.push({ id, brand: car.brand, model: car.model, price: car.price, efficiency: car.efficiency, fuel: car.fuel, image_url: car.image_url, hp: car.hp, acc_0_100: car.acc_0_100, car_type: car.car_type });
             btn.textContent = "★";
             btn.style.color = "#ffd166";
           } else {
