@@ -314,7 +314,7 @@ function displayResults(cars) {
                     <div>🐎 ${car.hp} แรงม้า</div>
                     <div>🚀 0-100: ${car.acc_0_100} วินาที</div>
                 </div>
-                <div style="margin-top:12px; display:flex; justify-content:flex-end; align-items:center; gap:4px;">
+                <div style="margin-top:0px; display:flex; justify-content:flex-end; align-items:center; gap:4px;">
                   ${ userEmail ? `<button class="fav-btn" data-carid="${carId}" style="background:transparent;border:none;cursor:pointer;font-size:2.5rem;color:${isFav? '#ffd166':'#94a3b8'}">${isFav? '★':'☆'}</button>` : '' }
                 </div>
             </div>
