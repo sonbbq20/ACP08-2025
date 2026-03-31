@@ -312,7 +312,8 @@ button#searchBtn:hover {
     background: rgba(255, 165, 0, 0.08);
     border: 1px solid rgba(255, 165, 0, 0.18);
     border-radius: 12px;
-    padding: 8px 10px;
+    padding: 10px 10px;
+    margin-top: 10px;
     margin-bottom: 10px;
     color: #ff8c00;
     font-weight: 700;
@@ -737,7 +738,7 @@ button#searchBtn:hover { transform: scale(1.05); }
     background:rgba(255,107,107,0.1); 
     color:#ff6b6b; 
     border: 1px solid rgba(255,107,107,0.3); 
-    padding:4px 10px; 
+    padding: 3px 10px;
     border-radius:20px; 
     font-size:0.8rem; 
     font-weight:500; 
