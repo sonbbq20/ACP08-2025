@@ -103,6 +103,43 @@
         </div>
     </div>
 
+    <section class="container visitor-dashboard" id="visitorDashboardSection">
+        <div class="visitor-dashboard-head">
+            <h2>แดชบอร์ดผู้เยี่ยมชมแบบเรียลไทม์</h2>
+            <p id="visitorDashboardUpdated" class="visitor-dashboard-updated">อัพเดทล่าสุด: -</p>
+        </div>
+
+        <div class="visitor-stats-grid">
+            <article class="visitor-stat-card visitor-total">
+                <p class="visitor-stat-label">Total Visits</p>
+                <p class="visitor-stat-value" id="visitorTotalCount">-</p>
+                <p class="visitor-stat-sub">ยอดเข้าชมทั้งหมด</p>
+            </article>
+
+            <article class="visitor-stat-card visitor-unique">
+                <p class="visitor-stat-label">Unique Visitors</p>
+                <p class="visitor-stat-value" id="visitorUniqueCount">-</p>
+                <p class="visitor-stat-sub">ผู้เยี่ยมชมไม่ซ้ำ (all-time)</p>
+            </article>
+
+            <article class="visitor-stat-card visitor-live">
+                <p class="visitor-stat-label">Live Now</p>
+                <p class="visitor-stat-value" id="visitorLiveCount">-</p>
+                <p class="visitor-stat-sub">ออนไลน์ภายใน 5 นาทีล่าสุด</p>
+            </article>
+        </div>
+
+        <div class="visitor-chart-card">
+            <div class="visitor-chart-head">
+                <h3>แนวโน้มการเข้าชมย้อนหลัง 24 ชั่วโมง</h3>
+                <p id="visitorDashboardStatus" class="visitor-dashboard-status" data-state="info">กำลังเชื่อมต่อข้อมูล...</p>
+            </div>
+            <div class="visitor-chart-wrap">
+                <canvas id="visitorChartCanvas" aria-label="24 hour visitors chart" role="img"></canvas>
+            </div>
+        </div>
+    </section>
+
     <!-- รถยอดนิยมแบ่งตามประเภท -->
     <div class="container" id="popularCarsSection">
         <h2 class="highlight" style="text-align: center; padding-bottom: 50px;"> รถยนต์ยอดนิยม</h2>
@@ -155,6 +192,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="javascript.js"></script>
 </body>
 

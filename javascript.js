@@ -6,6 +6,17 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let globalUser = null; 
+const VISITOR_SESSION_STORAGE_KEY = "cw_visitor_session_id";
+const VISITOR_HEARTBEAT_INTERVAL_MS = 60000;
+const VISITOR_DASHBOARD_POLL_INTERVAL_MS = 15000;
+const VISITOR_LIVE_WINDOW_MINUTES = 5;
+
+let visitorHeartbeatTimer = null;
+let visitorDashboardPollTimer = null;
+let visitorDashboardChart = null;
+let visitorDashboardChannel = null;
+let visitorTrackingInitialized = false;
+let visitorDashboardRefreshQueued = false;
 
 // ==========================================
 // 2. ตั้งค่าราคากลางน้ำมัน
@@ -57,6 +68,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   
   loadFavoritesPage();
+  initVisitorTracking();
+  initVisitorDashboard();
 });
 
 // ==========================================
@@ -580,3 +593,358 @@ function renderUserProfile() {
         }
     }
 }
+
+// ==========================================
+// 9. ระบบ Visitor Tracking & Dashboard
+// ==========================================
+function createVisitorSessionId() {
+  if (window.crypto && typeof window.crypto.randomUUID === "function") {
+    return window.crypto.randomUUID();
+  }
+  return `cw-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+}
+
+function getOrCreateVisitorSessionId() {
+  try {
+    let sessionId = window.localStorage.getItem(VISITOR_SESSION_STORAGE_KEY);
+    if (!sessionId) {
+      sessionId = createVisitorSessionId();
+      window.localStorage.setItem(VISITOR_SESSION_STORAGE_KEY, sessionId);
+    }
+    return sessionId;
+  } catch (error) {
+    console.warn("Visitor session storage unavailable", error);
+    return null;
+  }
+}
+
+function getCurrentPagePath() {
+  return window.location.pathname || "/";
+}
+
+async function recordVisitorPageView() {
+  const sessionId = getOrCreateVisitorSessionId();
+  if (!sessionId) return;
+
+  const nowIso = new Date().toISOString();
+  const pagePath = getCurrentPagePath();
+
+  const { error: sessionError } = await supabaseClient
+    .from("visitor_sessions")
+    .upsert(
+      {
+        session_id: sessionId,
+        last_seen: nowIso,
+        last_page: pagePath,
+      },
+      { onConflict: "session_id" }
+    );
+
+  if (sessionError) {
+    console.warn("Visitor session upsert failed", sessionError.message);
+    return;
+  }
+
+  const { error: pageViewError } = await supabaseClient.from("visitor_page_views").insert({
+    session_id: sessionId,
+    page_path: pagePath,
+    created_at: nowIso,
+  });
+
+  if (pageViewError) {
+    console.warn("Visitor page view insert failed", pageViewError.message);
+  }
+}
+
+async function upsertVisitorHeartbeat() {
+  const sessionId = getOrCreateVisitorSessionId();
+  if (!sessionId) return;
+
+  const nowIso = new Date().toISOString();
+  const { error } = await supabaseClient
+    .from("visitor_sessions")
+    .upsert(
+      {
+        session_id: sessionId,
+        last_seen: nowIso,
+        last_page: getCurrentPagePath(),
+      },
+      { onConflict: "session_id" }
+    );
+
+  if (error) {
+    console.warn("Visitor heartbeat update failed", error.message);
+  }
+}
+
+async function initVisitorTracking() {
+  if (visitorTrackingInitialized) return;
+  visitorTrackingInitialized = true;
+
+  try {
+    await recordVisitorPageView();
+    await upsertVisitorHeartbeat();
+  } catch (error) {
+    console.warn("Visitor tracking init failed", error.message || error);
+  }
+
+  visitorHeartbeatTimer = window.setInterval(() => {
+    if (document.visibilityState === "visible") {
+      upsertVisitorHeartbeat();
+    }
+  }, VISITOR_HEARTBEAT_INTERVAL_MS);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      upsertVisitorHeartbeat();
+    }
+  });
+
+  window.addEventListener("focus", upsertVisitorHeartbeat);
+}
+
+function initVisitorDashboard() {
+  if (!document.getElementById("visitorDashboardSection")) return;
+
+  refreshVisitorDashboard();
+  setupVisitorDashboardRealtime();
+  startVisitorDashboardPolling();
+}
+
+function startVisitorDashboardPolling() {
+  if (visitorDashboardPollTimer) {
+    window.clearInterval(visitorDashboardPollTimer);
+  }
+  visitorDashboardPollTimer = window.setInterval(() => {
+    refreshVisitorDashboard();
+  }, VISITOR_DASHBOARD_POLL_INTERVAL_MS);
+}
+
+function queueVisitorDashboardRefresh() {
+  if (visitorDashboardRefreshQueued) return;
+  visitorDashboardRefreshQueued = true;
+
+  window.setTimeout(() => {
+    visitorDashboardRefreshQueued = false;
+    refreshVisitorDashboard();
+  }, 1200);
+}
+
+function setVisitorDashboardStatus(message, state) {
+  const statusEl = document.getElementById("visitorDashboardStatus");
+  if (!statusEl) return;
+  statusEl.textContent = message;
+  statusEl.dataset.state = state || "info";
+}
+
+function setVisitorDashboardUpdated() {
+  const updateEl = document.getElementById("visitorDashboardUpdated");
+  if (!updateEl) return;
+  const dateText = new Date().toLocaleString("th-TH", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  updateEl.textContent = `อัพเดทล่าสุด: ${dateText}`;
+}
+
+function formatVisitorCount(value) {
+  return Number(value || 0).toLocaleString("th-TH");
+}
+
+function renderVisitorCounters(counters) {
+  const totalEl = document.getElementById("visitorTotalCount");
+  const uniqueEl = document.getElementById("visitorUniqueCount");
+  const liveEl = document.getElementById("visitorLiveCount");
+
+  if (totalEl) totalEl.textContent = formatVisitorCount(counters.totalVisits);
+  if (uniqueEl) uniqueEl.textContent = formatVisitorCount(counters.uniqueVisitors);
+  if (liveEl) liveEl.textContent = formatVisitorCount(counters.liveVisitors);
+}
+
+function formatVisitorBucketLabel(bucket) {
+  const dt = new Date(bucket);
+  if (Number.isNaN(dt.getTime())) return "";
+  return dt.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+}
+
+function renderVisitorChart(series) {
+  const canvas = document.getElementById("visitorChartCanvas");
+  if (!canvas) return;
+
+  if (!window.Chart) {
+    setVisitorDashboardStatus("โหลดกราฟไม่สำเร็จ (Chart.js)", "warning");
+    return;
+  }
+
+  const labels = series.map((row) => formatVisitorBucketLabel(row.bucket));
+  const data = series.map((row) => Number(row.visits || 0));
+
+  if (!visitorDashboardChart) {
+    const ctx = canvas.getContext("2d");
+    visitorDashboardChart = new window.Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Visits",
+            data,
+            borderColor: "#4a9eff",
+            backgroundColor: "rgba(74, 158, 255, 0.22)",
+            fill: true,
+            tension: 0.35,
+            borderWidth: 2,
+            pointRadius: 2,
+            pointHoverRadius: 4,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: "index",
+          intersect: false,
+        },
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false,
+            },
+            ticks: {
+              color: "#94a3b8",
+              maxTicksLimit: 8,
+            },
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: "rgba(148, 163, 184, 0.18)",
+            },
+            ticks: {
+              color: "#94a3b8",
+              precision: 0,
+            },
+          },
+        },
+      },
+    });
+    return;
+  }
+
+  visitorDashboardChart.data.labels = labels;
+  visitorDashboardChart.data.datasets[0].data = data;
+  visitorDashboardChart.update();
+}
+
+async function fetchVisitorDashboardCounters() {
+  const { data, error } = await supabaseClient.rpc("visitor_dashboard_counters", {
+    p_live_window_minutes: VISITOR_LIVE_WINDOW_MINUTES,
+  });
+
+  if (error) throw error;
+
+  const row = Array.isArray(data) ? (data[0] || {}) : (data || {});
+  return {
+    totalVisits: Number(row.total_visits || 0),
+    uniqueVisitors: Number(row.unique_visitors || 0),
+    liveVisitors: Number(row.live_visitors || 0),
+  };
+}
+
+async function fetchVisitorDashboardHourly() {
+  const { data, error } = await supabaseClient.rpc("visitor_dashboard_hourly", {
+    p_last_hours: 24,
+  });
+
+  if (error) throw error;
+
+  const rows = Array.isArray(data) ? data : [];
+  return rows.map((row) => ({
+    bucket: row.bucket,
+    visits: Number(row.visits || 0),
+  }));
+}
+
+function formatVisitorDashboardError(error) {
+  const errorText = `${error?.message || ""}`;
+  const needsSetup =
+    errorText.includes("visitor_dashboard_counters") ||
+    errorText.includes("visitor_dashboard_hourly") ||
+    errorText.includes("visitor_sessions") ||
+    errorText.includes("visitor_page_views");
+
+  if (needsSetup) {
+    return "ยังไม่พบตาราง/ฟังก์ชัน dashboard: กรุณารัน SQL ในไฟล์ supabase/realtime_visitor_dashboard.sql";
+  }
+  return "เชื่อมต่อข้อมูลไม่สำเร็จ ระบบจะลองใหม่อัตโนมัติ";
+}
+
+async function refreshVisitorDashboard() {
+  if (!document.getElementById("visitorDashboardSection")) return;
+
+  try {
+    const [counters, series] = await Promise.all([
+      fetchVisitorDashboardCounters(),
+      fetchVisitorDashboardHourly(),
+    ]);
+
+    renderVisitorCounters(counters);
+    renderVisitorChart(series);
+    setVisitorDashboardUpdated();
+    setVisitorDashboardStatus("Realtime พร้อมใช้งาน", "ok");
+  } catch (error) {
+    console.warn("Visitor dashboard refresh failed", error);
+    setVisitorDashboardStatus(formatVisitorDashboardError(error), "warning");
+  }
+}
+
+function setupVisitorDashboardRealtime() {
+  if (typeof supabaseClient.channel !== "function") return;
+
+  if (visitorDashboardChannel) {
+    supabaseClient.removeChannel(visitorDashboardChannel);
+  }
+
+  visitorDashboardChannel = supabaseClient
+    .channel("visitor-dashboard-realtime")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "visitor_page_views" },
+      queueVisitorDashboardRefresh
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "visitor_sessions" },
+      queueVisitorDashboardRefresh
+    )
+    .subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+        setVisitorDashboardStatus("Realtime พร้อมใช้งาน", "ok");
+      }
+      if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+        setVisitorDashboardStatus("Realtime ขัดข้อง, ใช้ polling ทุก 15 วินาที", "warning");
+      }
+    });
+}
+
+window.addEventListener("beforeunload", () => {
+  if (visitorHeartbeatTimer) {
+    window.clearInterval(visitorHeartbeatTimer);
+  }
+  if (visitorDashboardPollTimer) {
+    window.clearInterval(visitorDashboardPollTimer);
+  }
+  if (visitorDashboardChannel) {
+    supabaseClient.removeChannel(visitorDashboardChannel);
+  }
+});
