@@ -464,7 +464,7 @@ async function fetchOilPrices() {
       if (ptt.gasoline_95) oilPrices.gasoline95 = p(ptt.gasoline_95);
       if (ptt.gasohol_91) oilPrices.gasohol91 = p(ptt.gasohol_91);
       if (ptt.gasohol_e20) oilPrices.e20 = p(ptt.gasohol_e20);
-      if (ptt.diesel_b7) oilPrices.diesel = p(ptt.diesel_b7);
+      if (ptt.diesel) oilPrices.diesel = p(ptt.diesel);
       if (ptt.gasohol_e85) oilPrices.e85 = p(ptt.gasohol_e85);
       if (ptt.premium_diesel) oilPrices.premium_diesel = p(ptt.premium_diesel);
       if (ptt.ngv) oilPrices.ngv = p(ptt.ngv);
