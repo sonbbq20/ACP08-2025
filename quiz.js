@@ -10,46 +10,67 @@ function calculateQuiz() {
     city: 0,
   };
 
-  const radios = document.querySelectorAll("input[type=radio]:checked");
+  const requiredQuestions = [
+    "use",
+    "distance",
+    "purpose",
+    "style",
+    "passengers",
+    "tech",
+    "cost",
+    "ev",
+    "personality",
+    "design",
+  ];
 
-  if (radios.length < 10) {
-    alert("กรุณาตอบคำถามให้ครบ");
-    return;
+  const questionWeights = {
+    use: 1,
+    distance: 2,
+    purpose: 2,
+    style: 2,
+    passengers: 2,
+    tech: 2,
+    cost: 3,
+    ev: 4,
+    personality: 1,
+    design: 1,
+  };
+
+  const selections = {};
+  for (const q of requiredQuestions) {
+    const selected = document.querySelector(`input[name="${q}"]:checked`);
+    if (!selected) {
+      alert("กรุณาตอบคำถามให้ครบ");
+      return;
+    }
+    selections[q] = selected;
   }
 
-  radios.forEach((r) => {
-    scores[r.value]++;
+  requiredQuestions.forEach((q) => {
+    const trait = selections[q].value;
+    if (!Object.prototype.hasOwnProperty.call(scores, trait)) return;
+    scores[trait] += questionWeights[q] || 1;
   });
 
   let sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
 
   let top3 = sorted.slice(0, 3);
 
-  const featureText = {
-    eco: "รถ Hybrid หรือ EV ประหยัดพลังงาน",
-    performance: "รถสมรรถนะสูง ขับสนุก",
-    safety: "รถที่มีระบบความปลอดภัยสูง",
-    comfort: "รถที่ขับนุ่ม นั่งสบาย",
-    technology: "รถที่มีเทคโนโลยีทันสมัย",
-    family: "รถครอบครัวขนาดใหญ่",
-    suv: "รถ SUV ลุยได้ทุกสภาพถนน",
-    city: "รถขนาดเล็กเหมาะกับการขับในเมือง",
-  };
+  // Get budget
+  const budget = Number(document.getElementById("budgetSelect").value || 99999999);
+  const preferences = buildQuizPreferences(selections, budget, scores);
+  const resultHighlights = buildResultHighlights(top3, preferences);
 
   let result = "<h2>รถที่เหมาะกับคุณ</h2><ul>";
-
-  top3.forEach((f) => {
-    result += "<p>" + featureText[f[0]] + "</p>";
+  resultHighlights.forEach((text) => {
+    result += `<p>${text}</p>`;
   });
-
   result += "</ul>";
 
   document.getElementById("quizResult").innerHTML = result;
-  // Get budget
-  const budget = document.getElementById("budgetSelect").value || 99999999;
-  
-// Fetch and display recommended cars based on top traits (Top 2 traits passed)
-fetchRecommendedCars(top3, budget);
+
+  // Fetch and display recommended cars with hard constraints from explicit answers.
+  fetchRecommendedCars(top3, budget, preferences);
   document.getElementById("quizPage").classList.add("hidden");
   document.getElementById("resultPage").classList.remove("hidden");
 }
@@ -62,6 +83,8 @@ function goBack() {
   radios.forEach(r => r.checked = false);
 
   document.getElementById("quizResult").innerHTML = "";
+  const recommendation = document.getElementById("recommendedContainer");
+  if (recommendation) recommendation.innerHTML = "";
 
   // Smooth scroll
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -72,56 +95,21 @@ function goMain() {
   document.getElementById("mainPage").classList.remove("hidden");
 }
 
-async function fetchRecommendedCars(topTraits, budget = 99999999) {
-  // Build a query based on the top 2 traits
-  const trait1 = topTraits[0][0];
-  const trait2 = topTraits.length > 1 ? topTraits[1][0] : null;
-
-  const getQueryPart = (t) => {
-    switch (t) {
-      case "eco": return { q: "fuel=in.(ev,hybrid,phev)", type: "fuel" };
-      case "performance": return { q: "hp=gt.200", type: "perf" };
-      // Safety: Price > 2M and specific safe brands or generally just brands
-      case "safety": return { q: "brand=in.(Volvo,Mercedes-Benz,BMW,Audi,Tesla)", type: "brand" };
-      case "comfort": return { q: "car_type=in.(Sedan,SUV,MPV)", type: "body" };
-      case "technology": return { q: "fuel=eq.ev", type: "fuel" };
-      case "family": return { q: "car_type=in.(SUV,MPV,Van)", type: "body" };
-      case "suv": return { q: "car_type=in.(SUV,Crossover)", type: "body" };
-      case "city": return { q: "car_type=in.(Hatchback,Sedan)", type: "body" };
-      default: return null;
-    }
+async function fetchRecommendedCars(topTraits, budget = 99999999, preferencesInput = null) {
+  const preferences = preferencesInput || {
+    evMode: "open_ev",
+    budget: Number(budget) || 99999999,
+    traitScores: Object.fromEntries(topTraits || []),
   };
 
-  const p1 = getQueryPart(trait1);
-  const p2 = trait2 ? getQueryPart(trait2) : null;
-
-  let queryParts = [];
-  
-  // Add Budget Filter
-  queryParts.push(`price=lte.${budget}`);
-
-  if (p1) queryParts.push(p1.q);
-  
-  // Combine logic:
-  if (p2 && p1 && p1.type !== p2.type) {
-     queryParts.push(p2.q);
+  const safeBudget = Math.max(Number(budget) || 99999999, 0);
+  const queryParts = [`price=lte.${safeBudget}`];
+  if (preferences.evMode === "avoid_ev") {
+    queryParts.push("fuel=neq.ev");
   }
-
-  // Fallback
-  if (queryParts.length === 0) queryParts.push("limit=30");
-
-  // Add ordering
-  if(trait1 === 'performance') queryParts.push("order=hp.desc");
-  else if(trait1 === 'eco') queryParts.push("order=efficiency.desc");
-  else if(trait1 === 'price') queryParts.push("order=price.asc");
-  // ถอด default sort เป็น descending ออก เพื่อให้ได้ความหลากหลายมากขึ้น
-  
-  // ให้จำกัดดึงมาเยอะขึ้น เพื่อนำมาสุ่มเลือก
-  if(!queryParts.some(p => p.includes("limit"))) queryParts.push("limit=30");
+  queryParts.push("limit=150");
 
   const finalQuery = queryParts.join("&");
-  console.log("Query:", finalQuery);
-
   const url = `${SUPABASE_URL}/rest/v1/cars?select=*&${finalQuery}`;
 
   const resultPage = document.getElementById("resultPage");
@@ -159,29 +147,343 @@ async function fetchRecommendedCars(topTraits, budget = 99999999) {
 
     let cars = await response.json();
 
-    if (cars.length === 0) {
-      const fallbackUrl = `${SUPABASE_URL}/rest/v1/cars?select=*&limit=30`;
+    if (!cars || cars.length === 0) {
+      const relaxedBudget = Math.round(safeBudget * 1.2);
+      const fallbackQueryParts = [`price=lte.${Math.max(relaxedBudget, safeBudget)}`];
+      if (preferences.evMode === "avoid_ev") {
+        fallbackQueryParts.push("fuel=neq.ev");
+      }
+      fallbackQueryParts.push("limit=150");
+
+      const fallbackUrl = `${SUPABASE_URL}/rest/v1/cars?select=*&${fallbackQueryParts.join("&")}`;
       const fallbackRes = await fetch(fallbackUrl, {
         headers: {
           apikey: SUPABASE_KEY,
           Authorization: `Bearer ${SUPABASE_KEY}`,
         },
       });
-      let fallbackCars = await fallbackRes.json();
-      
-      // Shuffle fallback cars
-      fallbackCars = fallbackCars.sort(() => 0.5 - Math.random());
-      displayRecommendedCars(fallbackCars.slice(0, 4));
-    } else {
-      // Shuffle the results to avoid showing the exact same cars
-      cars = cars.sort(() => 0.5 - Math.random());
-      displayRecommendedCars(cars.slice(0, 4));
+      cars = await fallbackRes.json();
+    }
+
+    if (preferences.evMode === "avoid_ev") {
+      cars = (cars || []).filter((car) => String(car.fuel || "").toLowerCase() !== "ev");
+    }
+
+    if (!cars || cars.length === 0) {
+      container.innerHTML =
+        '<div style="grid-column: 1/-1; text-align: center; color: #facc15;">ยังไม่พบรถที่ตรงเงื่อนไข ลองเพิ่มงบประมาณหรือปรับคำตอบบางข้อ</div>';
+      return;
+    }
+
+    const rankedCars = rankCarsByQuizAccuracy(cars, preferences);
+    const finalCars = pickFinalRecommendations(rankedCars, preferences, 4);
+    displayRecommendedCars(finalCars);
+
+    if (preferences.evMode === "avoid_ev") {
+      const hasEV = finalCars.some((car) => String(car.fuel || "").toLowerCase() === "ev");
+      if (hasEV) {
+        console.warn("EV filtering warning: found EV in top result despite avoid_ev mode");
+      }
     }
   } catch (err) {
     console.error(err);
     container.innerHTML =
       '<div style="color: red; text-align: center;">ไม่สามารถโหลดข้อมูลรถได้</div>';
   }
+}
+
+function buildQuizPreferences(selections, budget, traitScores) {
+  const evOptions = Array.from(document.querySelectorAll('input[name="ev"]'));
+  const selectedEv = selections.ev;
+  const evIndex = evOptions.findIndex((node) => node === selectedEv);
+
+  let evMode = "open_ev";
+  if (evIndex === 2 || selectedEv.value === "performance") evMode = "avoid_ev";
+  else if (evIndex === 0) evMode = "prefer_ev";
+
+  return {
+    evMode,
+    budget: Number(budget) || 99999999,
+    annualDistance: Number(selections.distance.getAttribute("value1")) || 0,
+    usePattern: selections.use.value,
+    purpose: selections.purpose.value,
+    drivingStyle: selections.style.value,
+    passengers: selections.passengers.value,
+    costPriority: selections.cost.value,
+    techInterest: selections.tech.value,
+    personality: selections.personality.value,
+    design: selections.design.value,
+    traitScores: traitScores || {},
+  };
+}
+
+function getTraitWeight(preferences, trait) {
+  return Number((preferences.traitScores || {})[trait] || 0);
+}
+
+function getTraitMessage(trait, preferences) {
+  const traitText = {
+    eco:
+      preferences.evMode === "avoid_ev"
+        ? "รถประหยัดพลังงานที่ไม่ใช่ EV (เน้นน้ำมัน/ไฮบริด)"
+        : preferences.evMode === "prefer_ev"
+          ? "รถ EV หรือ Hybrid ประหยัดพลังงาน"
+          : "รถประหยัดพลังงานทั้งน้ำมัน Hybrid และ EV",
+    performance: "รถสมรรถนะสูง ขับสนุก",
+    safety: "รถที่มีระบบความปลอดภัยสูง",
+    comfort: "รถที่ขับนุ่ม นั่งสบาย",
+    technology:
+      preferences.evMode === "avoid_ev"
+        ? "รถเทคโนโลยีทันสมัย (ไม่เน้น EV ตามคำตอบของคุณ)"
+        : "รถที่มีเทคโนโลยีทันสมัย",
+    family: "รถครอบครัวขนาดใหญ่ รองรับผู้โดยสารได้ดี",
+    suv: "รถ SUV ลุยได้ทุกสภาพถนน",
+    city: "รถขนาดเล็กเหมาะกับการขับในเมือง",
+  };
+  return traitText[trait] || "รถที่ตรงกับไลฟ์สไตล์การใช้งานของคุณ";
+}
+
+function buildResultHighlights(top3, preferences) {
+  const highlights = [];
+  const added = new Set();
+
+  const pushUnique = (text) => {
+    if (!text || added.has(text)) return;
+    highlights.push(text);
+    added.add(text);
+  };
+
+  const fuelIntentText =
+    preferences.evMode === "avoid_ev"
+      ? "ระบบเน้นรถน้ำมันและไฮบริดตามคำตอบว่าไม่สนใจรถ EV"
+      : preferences.evMode === "prefer_ev"
+        ? "ระบบเน้นรถไฟฟ้าและไฮบริดตามความสนใจด้าน EV"
+        : "ระบบเลือกเชื้อเพลิงให้ยืดหยุ่นตามรูปแบบการใช้งาน";
+  pushUnique(fuelIntentText);
+
+  const purposeText = {
+    city: "เหมาะกับการใช้งานในเมืองและเดินทางประจำวัน",
+    performance: "เหมาะกับการขับที่ต้องการสมรรถนะและการเร่งตอบสนองดี",
+    suv: "เหมาะกับการเดินทางท่องเที่ยวและเส้นทางหลากหลาย",
+    family: "เหมาะกับการใช้งานครอบครัวและผู้โดยสารหลายคน",
+  };
+  pushUnique(purposeText[preferences.purpose]);
+
+  let drivingCostText = "";
+  if (preferences.costPriority === "eco") {
+    drivingCostText = "ให้ความสำคัญต้นทุนระยะยาวและความประหยัดเชื้อเพลิง";
+  } else if (preferences.drivingStyle === "performance") {
+    drivingCostText = "เน้นอัตราเร่งและฟีลการขับที่สนุกมากขึ้น";
+  } else if (preferences.drivingStyle === "safety") {
+    drivingCostText = "เน้นความปลอดภัยและความมั่นใจในการขับขี่";
+  } else {
+    drivingCostText = "เน้นความสมดุลระหว่างการใช้งานจริงและความสะดวกสบาย";
+  }
+  pushUnique(drivingCostText);
+
+  // Fill any missing lines from top traits so summary still reflects scoring.
+  (top3 || []).forEach((item) => {
+    const trait = Array.isArray(item) ? item[0] : null;
+    if (!trait) return;
+    pushUnique(getTraitMessage(trait, preferences));
+  });
+
+  return highlights.slice(0, 3);
+}
+
+function hasAnyKeyword(text, keywords) {
+  return keywords.some((keyword) => text.includes(keyword));
+}
+
+function rankCarsByQuizAccuracy(cars, preferences) {
+  const seenModels = new Set();
+
+  const ranked = (cars || [])
+    .map((car) => ({
+      car,
+      score: scoreCarByPreferences(car, preferences),
+    }))
+    .filter((item) => Number.isFinite(item.score))
+    .sort((a, b) => b.score - a.score)
+    .map((item) => item.car)
+    .filter((car) => {
+      const key = `${car.brand || ""}-${car.model || ""}`.toLowerCase();
+      if (seenModels.has(key)) return false;
+      seenModels.add(key);
+      return true;
+    });
+
+  return ranked;
+}
+
+function getFuelGroup(car) {
+  const fuel = String(car?.fuel || "").toLowerCase();
+  if (fuel === "ev") return "ev";
+  if (fuel === "hybrid" || fuel === "phev") return "hybrid";
+  return "combustion";
+}
+
+function pickFinalRecommendations(rankedCars, preferences, limit = 4) {
+  const ranked = Array.isArray(rankedCars) ? rankedCars : [];
+  if (ranked.length <= limit) return ranked;
+
+  const selected = [];
+  const selectedKey = new Set();
+  const groupBuckets = {
+    ev: [],
+    hybrid: [],
+    combustion: [],
+  };
+
+  ranked.forEach((car) => {
+    groupBuckets[getFuelGroup(car)].push(car);
+  });
+
+  const pushCar = (car) => {
+    const key = `${(car.brand || "").toLowerCase()}-${(car.model || "").toLowerCase()}`;
+    if (selectedKey.has(key)) return;
+    selected.push(car);
+    selectedKey.add(key);
+  };
+
+  // Respect EV preference mode while avoiding one-fuel dominance.
+  const priorityByMode =
+    preferences.evMode === "prefer_ev"
+      ? ["ev", "hybrid", "combustion"]
+      : preferences.evMode === "avoid_ev"
+        ? ["hybrid", "combustion"]
+        : ["hybrid", "combustion", "ev"];
+
+  // First pass: one item from each priority group.
+  priorityByMode.forEach((group) => {
+    const candidate = groupBuckets[group][0];
+    if (candidate) pushCar(candidate);
+  });
+
+  // Second pass: round-robin by group until reaching limit.
+  let cursor = 1;
+  while (selected.length < limit) {
+    let addedThisRound = false;
+    priorityByMode.forEach((group) => {
+      if (selected.length >= limit) return;
+      const candidate = groupBuckets[group][cursor];
+      if (candidate) {
+        pushCar(candidate);
+        addedThisRound = true;
+      }
+    });
+    if (!addedThisRound) break;
+    cursor += 1;
+  }
+
+  // Final fill: keep score order for any remaining slots.
+  if (selected.length < limit) {
+    ranked.forEach((car) => {
+      if (selected.length >= limit) return;
+      pushCar(car);
+    });
+  }
+
+  return selected.slice(0, limit);
+}
+
+function scoreCarByPreferences(car, preferences) {
+  const fuel = String(car.fuel || "").toLowerCase();
+  const carType = String(car.car_type || "").toLowerCase();
+  const brand = String(car.brand || "").toLowerCase();
+  const hp = Number(car.hp) || 0;
+  const efficiency = Number(car.efficiency) || 0;
+  const price = Number(car.price) || 0;
+  const acc = Number(car.acc_0_100) || 12;
+  const sale = Number(car.sale || car.Sale || 0) || 0;
+
+  const isEV = fuel === "ev";
+  const isHybridLike = fuel === "hybrid" || fuel === "phev";
+  const isSUV = hasAnyKeyword(carType, ["suv", "crossover"]);
+  const isFamilyBody = isSUV || hasAnyKeyword(carType, ["mpv", "van", "pickup"]);
+  const isCityBody = hasAnyKeyword(carType, ["hatchback", "sedan", "compact", "city"]);
+  const isComfortBody = isFamilyBody || hasAnyKeyword(carType, ["sedan", "wagon"]);
+
+  if (preferences.evMode === "avoid_ev" && isEV) {
+    return -1000000;
+  }
+
+  const safeBrands = ["volvo", "mercedes", "mercedes-benz", "bmw", "audi", "subaru", "toyota", "honda"];
+  const techBrands = ["tesla", "byd", "bmw", "mercedes", "audi", "nissan", "hyundai"];
+
+  let score = 0;
+
+  const addTrait = (trait, metric) => {
+    score += getTraitWeight(preferences, trait) * metric;
+  };
+
+  addTrait("eco", Math.min(efficiency / 18, 2.4) + (isEV ? 1.2 : isHybridLike ? 0.8 : 0.2));
+  addTrait("performance", Math.min(hp / 120, 2.8) + Math.max(0, (12 - acc) / 5));
+  addTrait("safety", (safeBrands.includes(brand) ? 1.8 : 0.5) + (isFamilyBody ? 0.6 : 0.2));
+  addTrait("comfort", (isComfortBody ? 1.4 : 0.4));
+  addTrait("technology", (techBrands.includes(brand) ? 1.3 : 0.3) + (isEV ? 1.2 : isHybridLike ? 0.8 : 0.1));
+  addTrait("family", isFamilyBody ? 1.7 : 0.1);
+  addTrait("suv", isSUV ? 1.8 : 0.1);
+  addTrait("city", (isCityBody ? 1.5 : 0.3) + Math.min(efficiency / 22, 1.2));
+
+  if (preferences.evMode === "prefer_ev") {
+    score += isEV ? 6 : isHybridLike ? 3 : -1.5;
+  } else if (preferences.evMode === "open_ev") {
+    score += isEV ? 1.8 : isHybridLike ? 1 : 0;
+  }
+
+  if (preferences.costPriority === "eco") {
+    const budget = Math.max(Number(preferences.budget) || 0, 1);
+    const priceFit = price > 0 ? Math.max(0, 1 - price / budget) : 0.2;
+    score += priceFit * 8;
+    score += Math.min(efficiency / 10, 2.8);
+  } else if (preferences.costPriority === "comfort") {
+    score += Math.min(efficiency / 16, 1.4);
+  } else {
+    score += Math.min(hp / 90, 3);
+  }
+
+  if (preferences.annualDistance >= 20000) {
+    score += Math.min(efficiency / 12, 3.2);
+    if (isEV || isHybridLike) score += 1.2;
+  } else if (preferences.annualDistance <= 15000 && isCityBody) {
+    score += 1.2;
+  }
+
+  if (preferences.purpose === "family") score += isFamilyBody ? 3 : -0.8;
+  if (preferences.purpose === "suv") score += isSUV ? 3 : -0.6;
+  if (preferences.purpose === "city") score += isCityBody ? 2.2 : 0;
+  if (preferences.purpose === "performance") score += Math.min(hp / 110, 2.5);
+
+  if (preferences.passengers === "family") score += isFamilyBody ? 2.5 : -0.8;
+  if (preferences.passengers === "comfort") score += isComfortBody ? 1.5 : 0.2;
+  if (preferences.passengers === "city") score += isCityBody ? 2 : 0.2;
+
+  if (preferences.drivingStyle === "performance") score += Math.min(hp / 100, 3.2);
+  if (preferences.drivingStyle === "comfort") score += isComfortBody ? 2 : 0.4;
+  if (preferences.drivingStyle === "safety") score += safeBrands.includes(brand) ? 2.2 : 0.6;
+  if (preferences.drivingStyle === "eco") score += Math.min(efficiency / 14, 2.6);
+
+  if (preferences.techInterest === "technology") score += isEV || isHybridLike ? 1.6 : 0.3;
+  if (preferences.techInterest === "comfort") score += isComfortBody ? 0.8 : 0.2;
+
+  if (preferences.personality === "technology") score += isEV || isHybridLike ? 1.3 : 0.2;
+  if (preferences.personality === "performance") score += Math.min(hp / 140, 1.8);
+  if (preferences.personality === "comfort") score += isComfortBody ? 1.1 : 0.2;
+  if (preferences.personality === "eco") score += Math.min(efficiency / 18, 1.5);
+
+  if (preferences.design === "suv") score += isSUV ? 1.4 : 0.1;
+  if (preferences.design === "performance") score += Math.min(hp / 150, 1.4);
+  if (preferences.design === "technology") score += isEV || isHybridLike ? 1.2 : 0.1;
+  if (preferences.design === "comfort") score += isComfortBody ? 1 : 0.2;
+
+  if (preferences.usePattern === "city") score += isCityBody ? 1.4 : 0;
+  if (preferences.usePattern === "comfort") score += isComfortBody ? 1 : 0;
+
+  // Light popularity bias for tie-break consistency.
+  score += Math.min(sale / 25000, 1.5);
+
+  return score;
 }
 
 function displayRecommendedCars(cars) {
